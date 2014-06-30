@@ -3,6 +3,9 @@
 
 site 'http://community.opscode.com/api/v1'
 
+cookbook 'runit', '1.5.10'
+cookbook 'nginx', '2.7.4'
+
 # cookbook 'chef-client'
 
 # cookbook 'apache2', '>= 1.0.0'
