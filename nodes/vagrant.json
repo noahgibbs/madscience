@@ -1,3 +1,20 @@
 {
-  "run_list": [ "rails_server" ]
+  "nginx": {
+    "#": "See docs at http://community.opscode.com/cookbooks/nginx",
+    "version": "1.2.3",
+    "default_site_enabled": false,
+    "source": {
+      "#": "There are lots of NGinX modules. See docs and search for a module name.",
+      "modules": [ "http_gzip_static_module", "http_ssl_module" ]
+    }
+  },
+  "rvm": {
+    "user_installs": [
+      {
+        "user": "www",
+        "default_ruby": "ruby-2.0.0"
+      }
+    ]
+  },
+  "run_list": [ "apt", "mysql::client", "mysql::server", "rvm::user_install", "rails_server" ]
 }
