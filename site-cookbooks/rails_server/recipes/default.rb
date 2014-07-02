@@ -9,7 +9,7 @@
 #include_recipe 'apt'
 #include_recipe 'mysql::client'
 #include_recipe 'mysql::server'
-include_recipe 'rvm::user_install'
+#include_recipe 'rvm::user_install'
 #include_recipe 'nginx::source'
 
 # Your application(s) shouldn't run as root.
