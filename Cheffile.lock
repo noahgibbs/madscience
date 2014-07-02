@@ -5,6 +5,8 @@ SITE
     bluepill (2.3.1)
       rsyslog (>= 0.0.0)
     build-essential (2.0.4)
+    mysql (5.3.6)
+      yum-mysql-community (>= 0.0.0)
     nginx (2.7.4)
       apt (~> 2.2)
       bluepill (~> 2.3)
@@ -21,8 +23,11 @@ SITE
     yum (3.2.2)
     yum-epel (0.3.6)
       yum (~> 3.0)
+    yum-mysql-community (0.1.8)
+      yum (>= 3.0.0)
 
 DEPENDENCIES
+  mysql (= 5.3.6)
   nginx (= 2.7.4)
   runit (= 1.5.10)
 
