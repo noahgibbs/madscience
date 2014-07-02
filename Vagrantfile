@@ -77,6 +77,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     #chef.add_recipe "mysql"
     #chef.add_role "web"
 
+    # This is to prevent a nasty SSL and HTTP warning
+    chef.custom_config_path = "Vagrantfile.chef"
+
     # You may also specify custom JSON attributes:
     run_list = chef_json.delete 'run_list'
     chef.json = chef_json
