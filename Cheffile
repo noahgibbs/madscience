@@ -3,6 +3,7 @@
 
 site 'http://community.opscode.com/api/v1'
 
+cookbook 'apt', '2.4.0'
 cookbook 'runit', '1.5.10'
 cookbook 'nginx', '2.7.4'
 cookbook 'mysql', '5.3.6'

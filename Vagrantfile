@@ -55,6 +55,16 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # View the documentation for the provider you're using for more
   # information on available options.
 
+  # Use this specific, not-default-for-Vagrant Chef version
+  config.omnibus.chef_version = "11.12.8"
+
+  # The file nodes/vagrant.json contains the Chef attributes,
+  # plus a run_list.
+
+  json_path = File.join(File.dirname(__FILE__), "nodes", "vagrant.json")
+  chef_json = JSON.parse File.read(json_path)
+  raise "Can't read JSON file for vagrant Chef node!" unless chef_json
+
   # Enable provisioning with chef solo, specifying a cookbooks path, roles
   # path, and data_bags path (all relative to this Vagrantfile), and adding
   # some recipes and/or roles.
@@ -68,6 +78,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     #chef.add_role "web"
 
     # You may also specify custom JSON attributes:
-    chef.json = { :mysql_password => "foo" }
+    run_list = chef_json.delete 'run_list'
+    chef.json = chef_json
+    chef.run_list = run_list
   end
 end
