@@ -2,10 +2,10 @@
   "nginx": {
     "#": "See docs at http://community.opscode.com/cookbooks/nginx",
     "version": "1.2.3",
-    "default_site_enabled": false,
+    "default_site_enabled": true,
     "source": {
       "#": "There are lots of NGinX modules. See docs and search for a module name.",
-      "modules": [ "http_gzip_static_module", "http_ssl_module" ]
+      "#modules": [ "http_gzip_static_module", "http_ssl_module" ]
     }
   },
   "mysql": {
@@ -19,13 +19,17 @@
         "user": "www",
         "default_ruby": "ruby-2.0.0"
       }
-    ]
+    ],
+    "vagrant": {
+        "system_chef_solo": "/opt/vagrant_ruby/bin/chef-solo"
+    }
   },
   "run_list": [
     "apt",
     "mysql::client",
     "mysql::server",
     "rvm::user_install",
+    "nginx::source",
     "rails_server"
   ]
 }
