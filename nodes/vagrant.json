@@ -8,6 +8,11 @@
       "modules": [ "http_gzip_static_module", "http_ssl_module" ]
     }
   },
+  "mysql": {
+    "#": "See http://community.opscode.com/cookbooks/mysql",
+    "server_root_password": "iloverandompasswords",
+    "allow_remote_root": false
+  },
   "rvm": {
     "user_installs": [
       {
@@ -16,5 +21,11 @@
       }
     ]
   },
-  "run_list": [ "apt", "mysql::client", "mysql::server", "rvm::user_install", "rails_server" ]
+  "run_list": [
+    "apt",
+    "mysql::client",
+    "mysql::server",
+    "rvm::user_install",
+    "rails_server"
+  ]
 }

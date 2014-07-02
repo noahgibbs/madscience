@@ -6,12 +6,6 @@
 # First, apt-get update. We do that with the run_list in
 # the Node JSON file.
 
-#include_recipe 'apt'
-#include_recipe 'mysql::client'
-#include_recipe 'mysql::server'
-#include_recipe 'rvm::user_install'
-#include_recipe 'nginx::source'
-
 # Your application(s) shouldn't run as root.
 # Each should have a username assigned to it.
 app_user = "www"
@@ -24,18 +18,6 @@ directory "/home/#{app_user}" do
   group app_user
   mode "0755"
 end
-
-
-# MySQL Config
-# http://community.opscode.com/cookbooks/mysql
-#mysql_service 'default' do
-#  # version '5.6'
-#  allow_remote_root false
-#  server_root_password 'iloverandompasswords'
-#  action :create
-#end
-
-#mysql_client 'default'
 
 
 # RVM Config
@@ -60,12 +42,7 @@ end
 #  user app_user
 #end
 
-# These will ordinarily be installed later with Bundler
-#rvm_gem "some_gem"
-#  user app_user
-#  version "1.2.3"
-#end
-
+# Test RVM install
 rvm_shell 'echo ruby' do
   user app_user
   code 'echo My Ruby is `rvm current`!'
@@ -73,17 +50,9 @@ rvm_shell 'echo ruby' do
 end
 
 #rvm_shell "migrate_rails_database" do
-#  ruby_string "1.8.7-p352@webapp"
-#  user        "deploy"
-#  group       "deploy"
+#  #ruby_string "1.8.7-p352@webapp"
+#  user        app_user
+#  group       app_user
 #  cwd         "/srv/webapp/current"
-#  code        %{rake RAILS_ENV=production db:migrate}
+#  code        %{bundle exec rake RAILS_ENV=production db:migrate}
 #end
-
-
-# Install and configure NGinX
-# http://community.opscode.com/cookbooks/nginx
-# NGinX uses recipes rather than providers.
-# So its configuration is primarily in
-# the node JSON file (vagrant.json).
-
