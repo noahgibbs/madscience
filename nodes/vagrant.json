@@ -5,7 +5,7 @@
     "default_site_enabled": true,
     "source": {
       "#": "There are lots of NGinX modules. See docs and search for a module name.",
-      "#modules": [ "http_gzip_static_module", "http_ssl_module" ]
+      "modules": [ "nginx::http_gzip_static_module", "nginx::http_ssl_module" ]
     }
   },
   "mysql": {
@@ -28,7 +28,9 @@
     "apt",
     "mysql::client",
     "mysql::server",
+    "basic_config",
     "rvm::user_install",
+    "nginx::http_gzip_static_module",
     "nginx::source",
     "rails_server"
   ]
