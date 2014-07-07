@@ -10,16 +10,6 @@
 # Each should have a username assigned to it.
 app_user = "www"
 
-# Set up app-specific user, group and home directory
-user app_user
-group app_user
-directory "/home/#{app_user}" do
-  owner app_user
-  group app_user
-  mode "0755"
-end
-
-
 # RVM Config
 # https://github.com/fnichol/chef-rvm
 
