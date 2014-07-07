@@ -38,3 +38,11 @@ template "/home/#{app_user}/.bash_profile" do
   group app_user
   mode "0744"
 end
+
+
+# NginX workaround: http_gzip_static_module needs this directory, and winds up
+# dying because it's not there yet when the nginx::source module includes it.
+directory "/etc/nginx/conf.d" do
+  recursive true
+end
+
