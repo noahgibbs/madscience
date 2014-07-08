@@ -1,3 +1,1 @@
-* Ruby 2.0.0-p481 isn't installed correctly - can't run apt-get update from www user
 * When RVM user ruby isn't installed, no error, just a (green text) warning
-
