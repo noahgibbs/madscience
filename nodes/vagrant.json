@@ -2,8 +2,6 @@
   "nginx": {
     "#": "See docs at http://community.opscode.com/cookbooks/nginx",
     "version": "1.4.4",
-    "#": "Error when building from source if configure flags aren't manually specified :-(",
-    "configure_flags": ["--with-http_ssl_module", "--with-http_gzip_static_module"]
   },
   "mysql": {
     "#": "See http://community.opscode.com/cookbooks/mysql",
@@ -27,7 +25,6 @@
     "mysql::server",
     "basic_config",
     "rvm::user_install",
-    "nginx::http_gzip_static_module",
     "nginx::source",
     "rails_server"
   ]
