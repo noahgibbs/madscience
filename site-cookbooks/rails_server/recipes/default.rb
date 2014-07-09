@@ -8,7 +8,6 @@
 
 # Your application(s) shouldn't run as root.
 # Each should have a username assigned to it.
-app_user = "www"
 
 # RVM Config
 # https://github.com/fnichol/chef-rvm
@@ -29,15 +28,18 @@ app_user = "www"
 # I don't use a Gemset here, but you could.
 # If you do, use rvm_environment "ruby-2.0.0-p0@my_gemset"
 package "gawk" # For Ubuntu, this is from "rvm requirements"
-rvm_default_ruby "2.0.0" do
-  user app_user
-end
 
-# Test RVM install
-rvm_shell 'echo ruby' do
-  user app_user
-  code 'echo My Ruby is `rvm current`!'
-  returns [0]
+node["users"].each do |app_user, user_data|
+  rvm_default_ruby "2.0.0" do
+    user app_user
+  end
+
+  # Test RVM install
+  rvm_shell 'echo ruby' do
+    user app_user
+    code 'echo My Ruby is `rvm current`!'
+    returns [0]
+  end
 end
 
 #rvm_shell "migrate_rails_database" do

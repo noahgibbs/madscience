@@ -1,7 +1,11 @@
+* Move RVM user installs into cookbook source files since they need to know users
+* Multiple apps
+* Let Rails apps mention Ubuntu packages to install
+
+== Security
 * SSH key for app user
 * Figure out password stuff for app user
-* Multiple app users
-* Multiple apps
+* Secure git clone of Rails apps
 
 
 == Fun Ideas

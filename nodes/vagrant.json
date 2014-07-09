@@ -1,7 +1,22 @@
 {
+  "rails_apps": {
+    "surveyor": {
+      "git": "git@github.com:noahgibbs/surveyor.git",
+      "user": "www",
+
+      "#": "An app can list what Ubuntu packages to install.",
+      "packages": []
+    }
+  },
+  "users": {
+    "www": {
+      "#TODO": "specify user SSH key(s) and password"
+    }
+  },
   "nginx": {
     "#": "See docs at http://community.opscode.com/cookbooks/nginx",
     "version": "1.4.4",
+    "default_site_enabled": false
   },
   "mysql": {
     "#": "See http://community.opscode.com/cookbooks/mysql",
