@@ -25,11 +25,16 @@
 # application, if hacked, can't install new ones.
 
 # Install Ruby 2.0 for the application.
-# I don't use a Gemset here, but you could.
-# If you do, use rvm_environment "ruby-2.0.0-p0@my_gemset"
 package "gawk" # For Ubuntu, this is from "rvm requirements"
 
-node["users"].each do |app_user, user_data|
+users = node["users"].keys
+
+# Use RVM's user_install recipe. Seems to be no LWRP equivalent.
+# That means setting attributes.
+node.default["rvm"]["user_installs"] = users.map { |u| { 'user' => u } }
+include_recipe "rvm::user_install"
+
+users.each do |app_user|
   rvm_default_ruby "2.0.0" do
     user app_user
   end

@@ -1,4 +1,3 @@
-* Move RVM user installs into cookbook source files since they need to know users
 * Multiple apps
 * Let Rails apps mention Ubuntu packages to install
 

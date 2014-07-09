@@ -8,6 +8,8 @@ librarian-chef install
 
 vagrant plugin install vagrant-omnibus --plugin-version 1.4.1
 
+TODO: remove StrictHostKeyChecking toggle after we install an SSH key automatically
+ssh www@localhost -p2222 -o "StrictHostKeyChecking no"
 
 ## Not so good:
 

@@ -6,6 +6,10 @@ description      'Installs/Configures rails_server'
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
 version          '0.1.0'
 
+depends "rvm"
+depends "nginx"
+depends "mysql"
+
 # This cookbook is normally 100% local - it assumes basic config like
 # creating users and groups has already been taken care of.
 #

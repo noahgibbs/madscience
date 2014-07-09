@@ -24,12 +24,8 @@
     "allow_remote_root": false
   },
   "rvm": {
-    "user_installs": [
-      {
-        "user": "www",
-        "default_ruby": "ruby-2.0.0"
-      }
-    ],
+    "#": "See https://github.com/fnichol/chef-rvm",
+    "#TODO": "Do we need to worry about a user_installs list?",
     "vagrant": {
         "system_chef_solo": "/opt/vagrant_ruby/bin/chef-solo"
     }
@@ -39,7 +35,7 @@
     "mysql::client",
     "mysql::server",
     "basic_config",
-    "rvm::user_install",
+    "rvm",
     "nginx::source",
     "rails_server"
   ]
