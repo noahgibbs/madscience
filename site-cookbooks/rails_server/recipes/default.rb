@@ -35,7 +35,7 @@ node.default["rvm"]["user_installs"] = users.map { |u| { 'user' => u } }
 include_recipe "rvm::user_install"
 
 users.each do |app_user|
-  rvm_default_ruby "2.0.0" do
+  rvm_default_ruby "2.0.0-p481" do
     user app_user
   end
 
@@ -48,9 +48,25 @@ users.each do |app_user|
 end
 
 #rvm_shell "migrate_rails_database" do
-#  #ruby_string "1.8.7-p352@webapp"
+#  #ruby_string "2.0.0-p481@webapp"
 #  user        app_user
 #  group       app_user
 #  cwd         "/srv/webapp/current"
 #  code        %{bundle exec rake RAILS_ENV=production db:migrate}
 #end
+
+# Who owns the top-level deploy directory?
+directory "/var/www" do
+  owner "root"
+  group "root"
+  mode "0755"
+end
+
+# Create directories for Capistrano
+node["rails_apps"].each do |app_name, app_data|
+  directory "/var/www/#{app_name}" do
+    owner app_data["user"]
+    group app_data["user"]
+    mode "0755"
+  end
+end
