@@ -1,11 +1,16 @@
-* Multiple apps
+== Features
+* Set up Capistrano for app, including Vagrant deploy environment
+* Make credentials directory, generate SSH keys, ask for user password(s)
 * Let Rails apps mention Ubuntu packages to install
 
 == Security
-* SSH key for app user
+* SSH key for app user - authorized_keys for deploy user(s)
+* Additional authorized SSH keys locally, public portion only
+* ~/.ssh/authorized_keys - mode 0600
+* add repository to list of known hosts?
+* Agent forwarding for Git checkout (see Capistrano) - needed to avoid passphraseless keys
 * Figure out password stuff for app user
-* Secure git clone of Rails apps
 
 
 == Fun Ideas
-* Clone dotfiles into home dir of app users
+* Clone dotfiles into home dir of app users - easy poking around
