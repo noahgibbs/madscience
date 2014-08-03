@@ -7,10 +7,32 @@
 * SSH key for app user - authorized_keys for deploy user(s)
 * Additional authorized SSH keys locally, public portion only
 * ~/.ssh/authorized_keys - mode 0600
-* add repository to list of known hosts?
+* add repository to list of known hosts? Or otherwise support secure Git checkout?
 * Agent forwarding for Git checkout (see Capistrano) - needed to avoid passphraseless keys
 * Figure out password stuff for app user
 
+== Security to Mention in Book
+* http://stackoverflow.com/questions/14715678/vagrant-insecure-by-default
+
+== Vagrant user security
+Problem with vagrant/vagrant and root/vagrant and default SSH key:
+https://docs.vagrantup.com/v2/vagrantfile/ssh_settings.html
+http://stackoverflow.com/questions/14715678/vagrant-insecure-by-default/14719184
+VAGRANTFILE_API_VERSION = "2"
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+
+# ...
+
+  config.ssh.shell = "bash -c 'BASH_ENV=/etc/profile exec bash'" # avoids 'stdin: is not a tty' error.
+
+  config.ssh.private_key_path = ["#{ENV['HOME']}/.ssh/id_rsa","#{ENV['HOME']}/.vagrant.d/insecure_private_key"]
+
+  config.vm.provision "shell", inline: <<-SCRIPT
+    printf "%s\n" "#{File.read("#{ENV['HOME']}/.ssh/id_rsa.pub")}" > /home/vagrant/.ssh/authorized_keys
+    chown -R vagrant:vagrant /home/vagrant/.ssh
+  SCRIPT
+end
 
 == Fun Ideas
 * Clone dotfiles into home dir of app users - easy poking around
