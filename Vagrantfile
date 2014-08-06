@@ -32,7 +32,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   # If true, then any SSH connections made will enable agent forwarding.
   # Default value: false
-  # config.ssh.forward_agent = true
+  config.ssh.forward_agent = true
 
   # Share an additional folder to the guest VM. The first argument is
   # the path on the host to the actual folder. The second argument is
@@ -64,6 +64,14 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   json_path = File.join(File.dirname(__FILE__), "nodes", "vagrant.json")
   chef_json = JSON.parse File.read(json_path)
   raise "Can't read JSON file for vagrant Chef node!" unless chef_json
+
+  # TODO: test on Windows
+  home_dir = ENV['HOME'] || ENV['userprofile']
+  creds_dir = File.join(home_dir, '.deploy_credentials')
+
+  # Read local credentials and pass them to Chef
+  #chef_json['ssh_public_key'] = File.read File.join(creds_dir, 'id_rsa_4096.pub')
+  chef_json['authorized_keys'] = File.read File.join(creds_dir, 'authorized_keys')
 
   # Enable provisioning with chef solo, specifying a cookbooks path, roles
   # path, and data_bags path (all relative to this Vagrantfile), and adding
