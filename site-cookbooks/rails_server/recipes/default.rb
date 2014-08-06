@@ -46,15 +46,20 @@ users.each do |app_user|
     code 'echo My Ruby is `rvm current`!'
     returns [0]
   end
-end
 
-#rvm_shell "migrate_rails_database" do
-#  #ruby_string "2.0.0-p481@webapp"
-#  user        app_user
-#  group       app_user
-#  cwd         "/srv/webapp/current"
-#  code        %{bundle exec rake RAILS_ENV=production db:migrate}
-#end
+  directory "/home/#{app_user}/.ssh" do
+    owner app_user
+    group app_user
+    mode "0700"
+  end
+
+  file "/home/#{app_user}/.ssh/authorized_keys" do
+    owner app_user
+    group app_user
+    mode "0700"
+    content node['authorized_keys']
+  end
+end
 
 # Who owns the top-level deploy directory?
 directory "/var/www" do
