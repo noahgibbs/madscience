@@ -36,3 +36,8 @@ end
 
 == Fun Ideas
 * Clone dotfiles into home dir of app users - easy poking around
+
+== Windows
+* http://corlewsolutions.com/articles/article-11-guide-to-setting-up-ssh-on-windows-7
+* http://corlewsolutions.com/articles/article-10-how-to-deploy-rails-applications-using-capistrano-3-1-and-windows-7
+* Examine: https://github.com/SciMed/capistrano-windows-server
