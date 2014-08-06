@@ -1,7 +1,7 @@
 {
   "rails_apps": {
-    "surveyor": {
-      "git": "git@github.com:noahgibbs/surveyor.git",
+    "rails-devise-pundit": {
+      "#git": "git@github.com:noahgibbs/rails-devise-pundit.git",
       "user": "www",
 
       "#": "An app can list what Ubuntu packages to install.",
@@ -10,7 +10,6 @@
   },
   "users": {
     "www": {
-      "#TODO": "specify user SSH key(s) and password"
     }
   },
   "nginx": {
