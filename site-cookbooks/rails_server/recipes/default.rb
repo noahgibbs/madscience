@@ -35,6 +35,7 @@ node.default["rvm"]["user_installs"] = users.map { |u| { 'user' => u } }
 include_recipe "rvm::user_install"
 
 users.each do |app_user|
+  # Install RVM and Ruby for each user
   rvm_default_ruby "2.0.0-p481" do
     user app_user
   end
@@ -62,7 +63,7 @@ directory "/var/www" do
   mode "0755"
 end
 
-# Create directories for Capistrano
+# Create directories for Capistrano to deploy to
 node["rails_apps"].each do |app_name, app_data|
   directory "/var/www/#{app_name}" do
     owner app_data["user"]
