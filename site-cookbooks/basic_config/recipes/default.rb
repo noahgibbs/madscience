@@ -13,7 +13,7 @@ node["users"].each do |app_user, user_data|
   # Set up app-specific user, group and home directory
   user app_user do
     shell "/bin/bash"
-    password "$1$yN53x/Fr$HZhgHSrSrwQmu/AV1V/tG."  # Hash of "AppUserPassword"
+    #password "$1$yN53x/Fr$HZhgHSrSrwQmu/AV1V/tG."  # Hash of "AppUserPassword"
   end
 
   group app_user
