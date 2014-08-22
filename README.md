@@ -8,7 +8,7 @@ licenses.
 
 ## Various useful things to do here:
 
-vagrant up / vagrant destroy / vagrant ssh
+vagrant up --provision / vagrant destroy / vagrant ssh
 
 vagrant provision
 
