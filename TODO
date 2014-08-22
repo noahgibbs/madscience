@@ -1,5 +1,4 @@
 == Features
-* Set up Capistrano for app, including Vagrant deploy environment
 * Make credentials directory, generate SSH keys, ask for user password(s)
 * Let Rails apps mention Ubuntu packages to install
 
