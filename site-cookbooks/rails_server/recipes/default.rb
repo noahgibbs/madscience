@@ -87,6 +87,7 @@ node["rails_apps"].each do |app_name, app_data|
       :user => app_data["user"],
       :group => app_data["user"],
       :app_dir => "/var/www/#{app_name}",
+      :ruby_version => "ruby-2.0.0-p481",  # TODO: Make settable per-app
       :unicorn_arguments => app_data["unicorn_arguments"] || "",  # Arguments to unicorn
       :log_run_arguments => app_data["log_run_arguments"] || "",  # Arguments to svlogd
       :chpst_arguments => app_data["chpst_arguments"] || "",    # Arguments to chpst
