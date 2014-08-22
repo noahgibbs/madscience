@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/bin/sh -l
+cd <%= @options[:app_dir] %>
 <%= @options[:extra_code] %>
 exec 2>&1
-exec chpst -v -u <%= @options[:user] %>:<%= @options[:group] %> <%= @options[:chpst_arguments] %> unicorn <%= @options[:unicorn_arguments] %>
+exec chpst -v -u <%= @options[:user] %>:<%= @options[:group] %> <%= @options[:chpst_arguments] %> bundle exec unicorn <%= @options[:unicorn_arguments] %>

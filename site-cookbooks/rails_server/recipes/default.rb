@@ -24,7 +24,7 @@
 # and the Ops folks lock down the gem directories so that the
 # application, if hacked, can't install new ones.
 
-# Install Ruby 2.0 for the application.
+# Install RVM and Ruby 2.0 for the application.
 package "gawk" # For Ubuntu, this is from "rvm requirements"
 
 users = node["users"].keys
@@ -33,6 +33,7 @@ users = node["users"].keys
 # That means setting attributes.
 node.default["rvm"]["user_installs"] = users.map { |u| { 'user' => u } }
 include_recipe "rvm::user_install"
+include_recipe "runit"
 
 users.each do |app_user|
   # Install RVM and Ruby for each user
@@ -74,5 +75,23 @@ node["rails_apps"].each do |app_name, app_data|
     owner app_data["user"]
     group app_data["user"]
     mode "0755"
+  end
+
+  runit_service app_name do
+    owner app_data["user"]
+    group app_data["user"]
+    template_name "rails-app"
+    log_template_name "rails-app"
+    options({
+      :app_name => app_name,
+      :user => app_data["user"],
+      :group => app_data["user"],
+      :app_dir => "/var/www/#{app_name}",
+      :unicorn_arguments => app_data["unicorn_arguments"] || "",  # Arguments to unicorn
+      :log_run_arguments => app_data["log_run_arguments"] || "",  # Arguments to svlogd
+      :chpst_arguments => app_data["chpst_arguments"] || "",    # Arguments to chpst
+      :extra_code => app_data["extra_run_code"] || "",         # Additional bash code in run script
+      :extra_log_code => app_data["extra_log_code"] || "",     # Additional bash code in log script
+    })
   end
 end
