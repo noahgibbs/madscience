@@ -4,7 +4,14 @@
       "#git": "git@github.com:noahgibbs/rails-devise-pundit.git",
       "user": "www",
 
-      "#": "An app can list what Ubuntu packages to install.",
+      "#uncomment these to use them": "",
+      "#unicorn_arguments": "arguments passed to unicorn",
+      "#log_run_arguments": "arguments passed to svlogd (runit)",
+      "#chpst_arguments":   "arguments passed to chpst (runit)",
+      "#extra_code":        "bash commands at start of run script (runit)",
+      "#extra_log_code":    "bash commands at start of log script (runit)",
+
+      "#": "An app can list what Ubuntu packages to install. [TO IMPLEMENT]",
       "packages": []
     }
   },
