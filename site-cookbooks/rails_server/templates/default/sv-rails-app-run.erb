@@ -1,0 +1,4 @@
+#!/bin/sh
+<%= @options[:extra_code] %>
+exec 2>&1
+exec chpst -v -u <%= @options[:user] %>:<%= @options[:group] %> <%= @options[:chpst_arguments] %> unicorn <%= @options[:unicorn_arguments] %>
