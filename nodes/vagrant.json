@@ -4,17 +4,25 @@
       "#git": "git@github.com:noahgibbs/rails-devise-pundit.git",
       "user": "www",
 
-      "#TODO": "set RAILS_ENV. Maybe other env vars?",
+      "#": "These are insecure right now and must all be changed",
+      "env_vars": {
+        "ADMIN_NAME": "admin",
+        "ADMIN_EMAIL": "admin@no-such-domain.no-such-tld",
+        "ADMIN_PASSWORD": "s00p3rs33kr1t",
+        "GMAIL_USERNAME": "the.codefolio.guy",
+        "GMAIL_PASSWORD": "notMyR34lP455w0rD$",
+        "DOMAIN_NAME": "codefol.io",
+        "SECRET_KEY_BASE": "5c2d20f4f56f5ba4012e70a9a2a0ad9b0fabfca15a3ffa4e6dc5b5b9df962f9350a544d35b08fefd55f5f1126b04654ac6ba778c7ae165b3234109322dfbefe9"
+      },
 
       "#uncomment these to use them": "",
-      "#env_vars":          { "VAR1": "value1" },
       "#unicorn_arguments": "arguments passed to unicorn",
       "#log_run_arguments": "arguments passed to svlogd (runit)",
       "#chpst_arguments":   "arguments passed to chpst (runit)",
       "#extra_code":        "bash commands at start of run script (runit)",
       "#extra_log_code":    "bash commands at start of log script (runit)",
 
-      "#": "An app can list what Ubuntu packages to install. [TO IMPLEMENT]",
+      "#": "An app can list what Ubuntu packages to install. [NOT YET IMPLEMENTED]",
       "packages": []
     }
   },
