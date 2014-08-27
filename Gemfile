@@ -8,3 +8,5 @@ gem 'capistrano-bundler', '1.1.2'
 gem 'capistrano-rails', '1.1.1'
 gem 'capistrano-rvm', '0.1.1'
 gem 'sshkit', '1.5.1'
+
+gem 'erubis'
