@@ -2,8 +2,12 @@
 
 export rvm_dir=<%= @options[:rvm_dir] %>
 export RUBY_BIN=<%= @options[:ruby_bin] %>
+export RAILS_ENV=production  # by default
 
-cd <%= @options[:app_dir] %>
+<%= @options[:env_vars].map { |name, value| "export #{name}=#{value}" }.join("\n") %>
+
+# This assumes Capistrano or Chef has already created a release
+cd <%= @options[:app_dir] %>/releases/current
 <%= @options[:extra_code] %>
 
 export rvm_ignore_rvmrc=1
