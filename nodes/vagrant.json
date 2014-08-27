@@ -4,7 +4,10 @@
       "#git": "git@github.com:noahgibbs/rails-devise-pundit.git",
       "user": "www",
 
+      "#TODO": "set RAILS_ENV. Maybe other env vars?",
+
       "#uncomment these to use them": "",
+      "#env_vars":          { "VAR1": "value1" },
       "#unicorn_arguments": "arguments passed to unicorn",
       "#log_run_arguments": "arguments passed to svlogd (runit)",
       "#chpst_arguments":   "arguments passed to chpst (runit)",

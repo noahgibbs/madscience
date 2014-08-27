@@ -69,6 +69,8 @@ directory "/var/www" do
   mode "0755"
 end
 
+# TODO: consider moving database.yml generation to Chef
+
 # Create directories for Capistrano to deploy to
 node["rails_apps"].each do |app_name, app_data|
   directory "/var/www/#{app_name}" do
@@ -76,6 +78,13 @@ node["rails_apps"].each do |app_name, app_data|
     group app_data["user"]
     mode "0755"
   end
+
+  home_dir = "/home/#{app_data["user"]}/"
+  rvm_dir = "/home/#{app_data["user"]}/.rvm/"
+  ruby_version = "ruby-2.0.0-p481"
+
+  # TODO: clone app so that service actually runs?
+  # Or run capistrano? Require that Cap runs before service starts?
 
   runit_service app_name do
     owner app_data["user"]
@@ -86,8 +95,13 @@ node["rails_apps"].each do |app_name, app_data|
       :app_name => app_name,
       :user => app_data["user"],
       :group => app_data["user"],
+      :ruby_version => ruby_version,  # TODO: Make settable per-app
+      :rvm_dir => rvm_dir,
+      :wrapper_dir => "#{rvm_dir}/wrappers/#{ruby_version}",
+      :ruby_bin => "#{rvm_dir}/wrappers/#{ruby_version}/ruby",
+      :home_dir => home_dir,
       :app_dir => "/var/www/#{app_name}",
-      :ruby_version => "ruby-2.0.0-p481",  # TODO: Make settable per-app
+      :env_vars => app_data["env_vars"] || {},
       :unicorn_arguments => app_data["unicorn_arguments"] || "",  # Arguments to unicorn
       :log_run_arguments => app_data["log_run_arguments"] || "",  # Arguments to svlogd
       :chpst_arguments => app_data["chpst_arguments"] || "",    # Arguments to chpst

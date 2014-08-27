@@ -1,14 +1,11 @@
 #!/bin/sh
 
-# TODO: FIX RVM SETUP!
-# It's not working -- the user in question isn't getting RVM loaded, because they're not
-# there until chpst happens. A login shell for this user doesn't help -- no RVM installed.
-# So presumably we need a subshell or something to get RVM loaded, or to use an
-# RVM wrapper properly.
-
-export RUBY_BIN=/home/<%= @options[:user] %>/.rvm/wrappers/<%= @options[:ruby_version] %>/ruby
+export rvm_dir=<%= @options[:rvm_dir] %>
+export RUBY_BIN=<%= @options[:ruby_bin] %>
 
 cd <%= @options[:app_dir] %>
 <%= @options[:extra_code] %>
+
+export rvm_ignore_rvmrc=1
 exec 2>&1
-exec chpst -v -u <%= @options[:user] %>:<%= @options[:group] %> <%= @options[:chpst_arguments] %> $RUBY_BIN bundle exec unicorn <%= @options[:unicorn_arguments] %>
+exec chpst -v -u <%= @options[:user] %>:<%= @options[:group] %> <%= @options[:chpst_arguments] %> <%= @options[:wrapper_dir] %>/bundle exec unicorn <%= @options[:unicorn_arguments] %>
