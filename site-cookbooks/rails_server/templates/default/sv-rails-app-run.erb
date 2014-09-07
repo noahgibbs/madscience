@@ -1,13 +1,24 @@
 #!/bin/sh
 
-export rvm_dir=<%= @options[:rvm_dir] %>
-export RUBY_BIN=<%= @options[:ruby_bin] %>
-export RAILS_ENV=production  # by default
+export RUNNING_AS_RUNIT=1
 
-<%= @options[:env_vars].map { |name, value| "export #{name}=#{value}" }.join("\n") %>
+. <%= @options[:app_dir] %>/rails_app_env.sh
 
-# This assumes Capistrano or Chef has already created a release
+# While app is not installed, wait. Unfortunately, Chef will
+# get errors if the app just isn't here, but we try to run it,
+# so it won't initially run successfully. This avoids that
+# problem by hanging until Capistrano is run, then finally
+# running the app.
+
+#i="0"
+while ! [ -h <%= @options[:app_dir] %>/releases/current ]
+do
+  sleep 5
+  #i=$[$i+1]
+done
+
 cd <%= @options[:app_dir] %>/releases/current
+
 <%= @options[:extra_code] %>
 
 export rvm_ignore_rvmrc=1
