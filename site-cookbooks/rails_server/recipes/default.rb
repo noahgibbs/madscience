@@ -34,6 +34,7 @@ users = node["users"].keys
 node.default["rvm"]["user_installs"] = users.map { |u| { 'user' => u } }
 include_recipe "rvm::user_install"
 include_recipe "runit"
+include_recipe "database::mysql"
 
 users.each do |app_user|
   # Install RVM and Ruby for each user

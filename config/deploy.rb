@@ -21,8 +21,8 @@ raise "Can't find app #{ENV['INSTALL_APP'].inspect} under ruby_apps in JSON!" un
 set :mysql_server_root_password, cap_json["mysql"]["server_root_password"]
 set :default_env, app["env_vars"] || {}
 
-
 set :application, ENV['INSTALL_APP']
+set :app_db_name, app["db_name"] || (ENV['INSTALL_APP'].gsub("-", "_") + "_production")
 set :repo_url, app["git"]
 # Want to use a protected Git URL, such as a GitHub SSH URL? You'll need to add the
 # SSH key to the appropriate user -- or use agent forwarding and have permissions locally.
@@ -97,16 +97,8 @@ namespace :deploy do
           username: root
           password: #{fetch(:mysql_server_root_password)}
 
-        development:
-          database: #{fetch(:application)}_development
-          <<: *base
-
-        test:
-          database: #{fetch(:application)}_test
-          <<: *base
-
         production:
-          database: #{fetch(:application)}_production
+          database: #{fetch(:app_db_name)}
           <<: *base
       EOF
       db_config_io = StringIO.new(db_config)
@@ -116,7 +108,14 @@ namespace :deploy do
         upload! db_config_io, "#{shared_path}/config/database.yml"
       end
     end
+
+    desc "Make symlink for database yaml"
+    task :symlink do
+      on roles(:all) do |host|
+        execute :ln, "-nfs", "#{shared_path}/config/database.yml", "#{release_path}/config/database.yml"
+      end
+    end
   end
   before "deploy:starting", "db:configure"
-  #before "deploy:updated", "db:symlink"  # Done by linked_files, above
+  before "deploy:updated", "db:symlink"  # Why not linked_files? Because that doesn't happen at the right time.
 end

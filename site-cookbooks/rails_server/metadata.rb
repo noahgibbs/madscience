@@ -9,6 +9,7 @@ version          '0.1.0'
 depends "rvm"
 depends "nginx"
 depends "mysql"
+depends "database"
 
 # This cookbook is normally 100% local - it assumes basic config like
 # creating users and groups has already been taken care of.
