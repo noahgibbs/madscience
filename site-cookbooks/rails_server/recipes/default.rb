@@ -70,9 +70,20 @@ directory "/var/www" do
   mode "0755"
 end
 
-# TODO: consider moving database.yml generation to Chef
+# Create databases for applications
+node["ruby_apps"].each do |app_name, app_data|
+  db_name = app_data["db_name"] || (app_name.gsub("-", "_") + "_production")
+  mysql_database db_name do
+    connection(
+      :host     => 'localhost',
+      :username => 'root',
+      :password => node['mysql']['server_root_password']
+    )
+    action :create
+  end
+end
 
-# Create directories for Capistrano to deploy to
+# Create application directories for Capistrano to deploy to
 node["ruby_apps"].each do |app_name, app_data|
   directory "/var/www/#{app_name}" do
     owner app_data["user"]
