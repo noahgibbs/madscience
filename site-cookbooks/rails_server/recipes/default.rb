@@ -72,7 +72,7 @@ end
 # TODO: consider moving database.yml generation to Chef
 
 # Create directories for Capistrano to deploy to
-node["rails_apps"].each do |app_name, app_data|
+node["ruby_apps"].each do |app_name, app_data|
   directory "/var/www/#{app_name}" do
     owner app_data["user"]
     group app_data["user"]
