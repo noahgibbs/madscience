@@ -1,10 +1,33 @@
 # config valid only for Capistrano 3.1
 lock '3.2.1'
 
-set :application, 'rails-devise-pundit'
-set :repo_url, 'https://github.com/noahgibbs/rails-devise-pundit.git'
+# We want to share app data between Chef and Capistrano. So load
+# it here from the appropriate .json.erb file.
+require "erubis"
+require "json"
+json_erb_path = File.join(File.dirname(__FILE__), "..", "nodes", "all_nodes.json.erb")
+eruby = Erubis::Eruby.new File.read(json_erb_path)
 
-set :rails_env, 'production'
+cap_json = JSON.parse eruby.result({})
+raise "Can't read JSON file for vagrant Capistrano node!" unless cap_json
+
+# We must specify which application to install. There could be multiple.
+ENV['INSTALL_APP'] ||= cap_json["ruby_apps"].keys.first
+
+raise "You must specify an INSTALL_APP variable or just have one app!" unless ENV['INSTALL_APP']
+app = cap_json["ruby_apps"][ENV['INSTALL_APP']]
+raise "Can't find app #{ENV['INSTALL_APP'].inspect} under ruby_apps in JSON!" unless app
+
+set :mysql_server_root_password, cap_json["mysql"]["server_root_password"]
+set :default_env, app["env_vars"] || {}
+
+
+set :application, ENV['INSTALL_APP']
+set :repo_url, app["git"]
+# Want to use a protected Git URL, such as a GitHub SSH URL? You'll need to add the
+# SSH key to the appropriate user -- or use agent forwarding and have permissions locally.
+
+set :rails_env, app["env_vars"]["RAILS_ENV"] || app["env_vars"]["RACK_ENV"] || 'production'
 
 # Default branch is :master
 # ask :branch, proc { `git rev-parse --abbrev-ref HEAD`.chomp }.call
@@ -25,7 +48,7 @@ set :rails_env, 'production'
 # set :pty, true
 
 # Default value for :linked_files is []
-# set :linked_files, %w{config/database.yml}
+set :linked_files, %w{config/database.yml}
 
 # Default value for linked_dirs is []
 # set :linked_dirs, %w{bin log tmp/pids tmp/cache tmp/sockets vendor/bundle public/system}
@@ -34,7 +57,7 @@ set :rails_env, 'production'
 # set :default_env, { path: "/opt/ruby/bin:$PATH" }
 
 # Default value for keep_releases is 5
-# set :keep_releases, 5
+set :keep_releases, 10
 
 namespace :deploy do
 
@@ -72,7 +95,7 @@ namespace :deploy do
           reconnect: false
           pool: 5
           username: root
-          #password:
+          password: #{fetch(:mysql_server_root_password)}
 
         development:
           database: #{fetch(:application)}_development
@@ -93,14 +116,7 @@ namespace :deploy do
         upload! db_config_io, "#{shared_path}/config/database.yml"
       end
     end
-
-    desc "Make symlink for database yaml"
-    task :symlink do
-      on roles(:all) do |host|
-        execute :ln, "-nfs", "#{shared_path}/config/database.yml", "#{release_path}/config/database.yml"
-      end
-    end
   end
   before "deploy:starting", "db:configure"
-  before "deploy:updated", "db:symlink"
+  #before "deploy:updated", "db:symlink"  # Done by linked_files, above
 end
