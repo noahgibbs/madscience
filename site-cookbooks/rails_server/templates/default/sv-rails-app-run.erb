@@ -25,4 +25,4 @@ cd <%= @options[:app_dir] %>/current
 
 export rvm_ignore_rvmrc=1
 exec 2>&1
-exec chpst -v -u <%= @options[:user] %>:<%= @options[:group] %> <%= @options[:chpst_arguments] %> <%= @options[:wrapper_dir] %>/bundle exec unicorn <%= @options[:unicorn_arguments] %>
+exec chpst -v -u <%= @options[:user] %>:<%= @options[:group] %> <%= @options[:chpst_arguments] %> <%= @options[:wrapper_dir] %>/bundle exec unicorn -l <%= @options[:unicorn_port] %> <%= @options[:unicorn_arguments] %>

@@ -96,7 +96,11 @@ node["ruby_apps"].each do |app_name, app_data|
     group app_data["user"]
     mode "0755"
   end
+end
 
+# Create services, run files and other runit and nginx infrastructure
+port = 8800 # Assign consecutive Unicorn port ranges starting at 8800
+node["ruby_apps"].each do |app_name, app_data|
   ruby_version = "ruby-2.0.0-p481" # TODO: Make settable per-app
   rvm_dir = "/home/#{app_data["user"]}/.rvm/"
 
@@ -111,9 +115,10 @@ node["ruby_apps"].each do |app_name, app_data|
     :wrapper_dir => "#{rvm_dir}/wrappers/#{ruby_version}",
     :ruby_bin => "#{rvm_dir}/wrappers/#{ruby_version}/ruby",
     :env_vars => app_data["env_vars"] || {},
-    :unicorn_arguments => app_data["unicorn_arguments"] || "",  # Arguments to unicorn
-    :log_run_arguments => app_data["log_run_arguments"] || "",  # Arguments to svlogd
-    :chpst_arguments => app_data["chpst_arguments"] || "",      # Arguments to chpst
+    :unicorn_arguments => app_data["unicorn_arguments"] || "",  # Extra arguments to unicorn
+    :unicorn_port => port,                                      # Unicorn port number
+    :log_run_arguments => app_data["log_run_arguments"] || "",  # Extra arguments to svlogd
+    :chpst_arguments => app_data["chpst_arguments"] || "",      # Extra arguments to chpst
     :extra_code => app_data["extra_run_code"] || "",            # Additional bash code in run script
     :extra_log_code => app_data["extra_log_code"] || "",        # Additional bash code in log script
   }
@@ -125,4 +130,17 @@ node["ruby_apps"].each do |app_name, app_data|
     log_template_name "rails-app"
     options vars
   end
+
+  template "#{node['nginx']['dir']}/sites-available/#{app_name}.conf" do
+    source "nginx-site.conf.erb"
+    mode "0644"
+    variables({:app_dir => vars[:app_dir],
+      :app_name => app_name,
+      :unicorn_port => port
+    })
+  end
+
+  nginx_site "#{app_name}.conf"
+
+  port += 100
 end
