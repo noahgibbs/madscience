@@ -13,13 +13,13 @@ export RAILS_ENV=production  # by default
 # running the app.
 
 #i="0"
-while ! [ -h <%= @options[:app_dir] %>/releases/current ]
+while ! [ -h <%= @options[:app_dir] %>/current ]
 do
   sleep 5
   #i=$[$i+1]
 done
 
-cd <%= @options[:app_dir] %>/releases/current
+cd <%= @options[:app_dir] %>/current
 
 <%= @options[:extra_code] %>
 
