@@ -61,10 +61,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # The file nodes/vagrant.json contains the Chef attributes,
   # plus a run_list.
 
-  json_erb_path = File.join(File.dirname(__FILE__), "nodes", "vagrant.json.erb")
+  json_erb_path = File.join(File.dirname(__FILE__), "nodes", "all_nodes.json.erb")
   eruby = Erubis::Eruby.new File.read(json_erb_path)
 
-  # TODO: what variables should be passed to evaluate?
+  # TODO: add Vagrant-specific node file and merge it over top of all_nodes.json.erb
   chef_json = JSON.parse eruby.result({})
   raise "Can't read JSON file for vagrant Chef node!" unless chef_json
 
