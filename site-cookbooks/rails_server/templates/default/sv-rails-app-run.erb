@@ -1,8 +1,10 @@
 #!/bin/sh
 
-export RUNNING_AS_RUNIT=1
+export rvm_dir=<%= @options[:rvm_dir] %>
+export RUBY_BIN=<%= @options[:ruby_bin] %>
+export RAILS_ENV=production  # by default
 
-. <%= @options[:app_dir] %>/rails_app_env.sh
+<%= @options[:env_vars].map { |name, value| "export #{name}=#{value}" }.join("\n") %>
 
 # While app is not installed, wait. Unfortunately, Chef will
 # get errors if the app just isn't here, but we try to run it,

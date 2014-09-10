@@ -1,5 +1,0 @@
-export rvm_dir=<%= @rvm_dir %>
-export RUBY_BIN=<%= @ruby_bin %>
-export RAILS_ENV=production  # by default
-
-<%= @env_vars.map { |name, value| "export #{name}=#{value}" }.join("\n") %>

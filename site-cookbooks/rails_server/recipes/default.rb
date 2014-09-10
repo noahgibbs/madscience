@@ -79,6 +79,12 @@ node["rails_apps"].each do |app_name, app_data|
     mode "0755"
   end
 
+  directory "/var/www/#{app_name}/shared" do
+    owner app_data["user"]
+    group app_data["user"]
+    mode "0755"
+  end
+
   ruby_version = "ruby-2.0.0-p481" # TODO: Make settable per-app
   rvm_dir = "/home/#{app_data["user"]}/.rvm/"
 
@@ -93,27 +99,18 @@ node["rails_apps"].each do |app_name, app_data|
     :wrapper_dir => "#{rvm_dir}/wrappers/#{ruby_version}",
     :ruby_bin => "#{rvm_dir}/wrappers/#{ruby_version}/ruby",
     :env_vars => app_data["env_vars"] || {},
+    :unicorn_arguments => app_data["unicorn_arguments"] || "",  # Arguments to unicorn
+    :log_run_arguments => app_data["log_run_arguments"] || "",  # Arguments to svlogd
+    :chpst_arguments => app_data["chpst_arguments"] || "",      # Arguments to chpst
+    :extra_code => app_data["extra_run_code"] || "",            # Additional bash code in run script
+    :extra_log_code => app_data["extra_log_code"] || "",        # Additional bash code in log script
   }
-
-  template "/var/www/#{app_name}/rails_app_env.sh" do
-    source "rails_app_env.erb"
-    owner app_data["user"]
-    group app_data["user"]
-    mode "0744"
-    variables vars
-  end
 
   runit_service app_name do
     owner app_data["user"]
     group app_data["user"]
     template_name "rails-app"
     log_template_name "rails-app"
-    options vars.merge({
-      :unicorn_arguments => app_data["unicorn_arguments"] || "",  # Arguments to unicorn
-      :log_run_arguments => app_data["log_run_arguments"] || "",  # Arguments to svlogd
-      :chpst_arguments => app_data["chpst_arguments"] || "",    # Arguments to chpst
-      :extra_code => app_data["extra_run_code"] || "",         # Additional bash code in run script
-      :extra_log_code => app_data["extra_log_code"] || "",     # Additional bash code in log script
-    })
+    options vars
   end
 end

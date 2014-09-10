@@ -1,7 +1,24 @@
+<%
+  # Note: this is a .json.erb file. So we evaluate it with Erb, which results
+  # in JSON. If you've used Erb in Rails' database.yml, this is basically the
+  # same thing.
+
+  # Here, we get to run appropriate Ruby code of whatever kind we like.  For
+  # instance, anything you've put into ~/.deploy_credentials is fair game for
+  # loading. You may want your passwords there!
+
+  # Keep in mind that this code loads in both Capistrano and Chef.  Try not to
+  # put in Cap-specific code (fails in Chef) or Chef-specific code (fails in
+  # Capistrano.) When in doubt, create a new Vagrant VM from scratch using
+  # both Chef and Capistrano as a test.
+%>
+
 {
   "rails_apps": {
     "rails-devise-pundit": {
-      "#git": "git@github.com:noahgibbs/rails-devise-pundit.git",
+      "git": "git@github.com:noahgibbs/rails-devise-pundit.git",
+      "#TODO": "more git configuration - see Capistrano files",
+      "#TODO": "optionally specify no asset build and/or no migration",
       "user": "www",
 
       "#": "These are insecure right now and must all be changed",
@@ -17,7 +34,7 @@
         "SECRET_KEY_BASE": "5c2d20f4f56f5ba4012e70a9a2a0ad9b0fabfca15a3ffa4e6dc5b5b9df962f9350a544d35b08fefd55f5f1126b04654ac6ba778c7ae165b3234109322dfbefe9"
       },
 
-      "#uncomment these to use them": "",
+      "#": "uncomment these to use them",
       "#unicorn_arguments": "arguments passed to unicorn",
       "#log_run_arguments": "arguments passed to svlogd (runit)",
       "#chpst_arguments":   "arguments passed to chpst (runit)",
