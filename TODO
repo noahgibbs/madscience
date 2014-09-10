@@ -1,14 +1,18 @@
 == Features
 * Make credentials directory, generate SSH keys, ask for user password(s)
 * Let Rails apps mention Ubuntu packages to install
+* Env-specific JSON files, load and merge in Chef and Cap
 
 == Security
 * SSH key for app user - authorized_keys for deploy user(s)
 * Additional authorized SSH keys locally, public portion only
 * ~/.ssh/authorized_keys - mode 0600
-* Somehow support secure Git checkout? Test w/ private repo
+* Support secure Git checkouts. Test w/ private repo
 * Agent forwarding for Git checkout (see Capistrano) - avoids passphraseless key requirement
-* Figure out password stuff for app user
+* Set app user system password at all? If so, do from ~/.deploy_credentials
+* Non-root MySQL for app user, root MySQL only for migrations
+** Needs to set up user security when creating tables. Reasonable?
+* Vagrant user security - fix before real deploy!
 
 == Security to Mention in Book
 * http://stackoverflow.com/questions/14715678/vagrant-insecure-by-default
