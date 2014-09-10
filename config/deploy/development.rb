@@ -1,3 +1,4 @@
+# Check both for cross-platform compatibility
 home_dir = ENV['HOME'] || ENV['userprofile']
 
 server 'localhost',
