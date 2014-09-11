@@ -142,7 +142,9 @@ node["ruby_apps"].each do |app_name, app_data|
     mode "0644"
     variables({:app_dir => vars[:app_dir],
       :app_name => app_name,
-      :unicorn_port => port
+      :unicorn_port => port,
+      :server_names => app_data["server_names"] ? [app_data["server_names"]].flatten : [],
+      :redirect_hostnames => app_data["redirect_hostnames"] ? [app_data["redirect_hostnames"]].flatten : []
     })
   end
 

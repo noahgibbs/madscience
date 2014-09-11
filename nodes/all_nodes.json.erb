@@ -22,8 +22,9 @@
       "#TODO": "optionally specify no asset build and/or no migration",
       "user": "www",
 
+      "#": "env_vars is used for app-specific environment variables. They won't be used for configuring the server.",
+
       "#": "These are insecure right now and must all be changed",
-      "#": "This is a .json.erb file, so you could load them from ~/.deploy_credentials",
       "#TODO": "Generate the secret keys repeatably and cross-platform in ~/.deploy_credentials",
       "env_vars": {
         "ADMIN_NAME": "admin",
@@ -41,6 +42,10 @@
       "#chpst_arguments":   "arguments passed to chpst (runit)",
       "#extra_code":        "bash commands at start of run script (runit)",
       "#extra_log_code":    "bash commands at start of log script (runit)",
+
+      "#": "NGinX lets you specify server names and redirect URLs. Use 'default' to mean just that.",
+      "redirect_hostnames": [],
+      "server_names": ["default", "rdp.127.0.0.1.xip.io"],
 
       "#": "An app can list what Ubuntu packages to install. [NOT YET IMPLEMENTED]",
       "packages": []
