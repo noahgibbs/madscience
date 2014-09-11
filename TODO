@@ -3,6 +3,9 @@
 * Let Rails apps mention Ubuntu packages to install
 * Env-specific JSON files, load and merge in Chef and Cap
 
+== Correctness
+* After new Capistrano deploy, make sure static content is properly updated. If not, restart NGinX on deploy
+
 == Security
 * SSH key for app user - authorized_keys for deploy user(s)
 * Additional authorized SSH keys locally, public portion only
