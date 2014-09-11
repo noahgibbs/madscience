@@ -96,6 +96,12 @@ node["ruby_apps"].each do |app_name, app_data|
     group app_data["user"]
     mode "0755"
   end
+
+  directory "/var/www/#{app_name}/shared/log" do
+    owner app_data["user"]
+    group app_data["user"]
+    mode "0755"
+  end
 end
 
 # Create services, run files and other runit and nginx infrastructure

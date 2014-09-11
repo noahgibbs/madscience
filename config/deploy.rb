@@ -116,6 +116,18 @@ namespace :deploy do
       end
     end
   end
+
+  # Can we find a way to do this with linked_files? The hard part is that tasks like
+  # migration and asset compilation seem to happen before the files are linked.
+  namespace :db do
+    task :symlink do
+      on roles(:all) do |host|
+        execute :ln, "-nfs", "#{shared_path}/log", "#{release_path}/log"
+      end
+    end
+  end
+
   before "deploy:starting", "db:configure"
   before "deploy:updated", "db:symlink"  # Why not linked_files? Because that doesn't happen at the right time.
+  before "deploy:updated", "log:symlink"  # Why not linked_files? Because that doesn't happen at the right time.
 end
