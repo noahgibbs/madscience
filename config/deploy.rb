@@ -119,7 +119,7 @@ namespace :deploy do
 
   # Can we find a way to do this with linked_files? The hard part is that tasks like
   # migration and asset compilation seem to happen before the files are linked.
-  namespace :db do
+  namespace :log do
     task :symlink do
       on roles(:all) do |host|
         execute :ln, "-nfs", "#{shared_path}/log", "#{release_path}/log"
