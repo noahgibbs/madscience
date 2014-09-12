@@ -11,6 +11,25 @@
   # put in Cap-specific code (fails in Chef) or Chef-specific code (fails in
   # Capistrano.) When in doubt, create a new Vagrant VM from scratch using
   # both Chef and Capistrano as a test.
+
+  # As an example, we generate a SECRET_KEY_BASE here, which can be used
+  # for your various apps if it doesn't already exist.
+
+  home_dir = ENV['HOME'] || ENV['userdir'] || "/home/#{ENV['USER']}"
+  filename = File.join(home_dir, ".deploy_credentials", "rails_app_secret_keys.json")
+  if File.exist? filename
+    secret_keys = JSON.parse(File.read filename)
+  else
+    secret_keys = {}
+  end
+  orig_secret_keys = secret_keys.clone
+
+  # Generate secret keys for any app without them
+  secret_keys["rails-devise-pundit"] ||= (0..127).map { (('a'..'f').to_a + ('0'..'9').to_a).sample }.join
+
+  if orig_secret_keys != secret_keys
+    File.open(filename, "w") { |f| f.write JSON.dump(secret_keys) }
+  end
 %>
 
 {
@@ -25,7 +44,6 @@
       "#": "env_vars is used for app-specific environment variables. They won't be used for configuring the server.",
 
       "#": "These are insecure right now and must all be changed",
-      "#TODO": "Generate the secret keys repeatably and cross-platform in ~/.deploy_credentials",
       "env_vars": {
         "ADMIN_NAME": "admin",
         "ADMIN_EMAIL": "admin@no-such-domain.no-such-tld",
@@ -33,7 +51,7 @@
         "GMAIL_USERNAME": "the.codefolio.guy",
         "GMAIL_PASSWORD": "notMyR34lP455w0rD$",
         "DOMAIN_NAME": "example.com",
-        "SECRET_KEY_BASE": "5c2d20f4f56f5ba4012e70a9a2a0ad9b0fabfca15a3ffa4e6dc5b5b9df962f9350a544d35b08fefd55f5f1126b04654ac6ba778c7ae165b3234109322dfbefe9"
+        "SECRET_KEY_BASE": <%= secret_keys['rails-devise-pundit'].inspect %>
       },
 
       "#": "uncomment these to use them",

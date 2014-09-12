@@ -1,5 +1,4 @@
 == Features
-* Make credentials directory, generate SSH keys, ask for user password(s)
 * Let Rails apps mention Ubuntu packages to install
 * Env-specific JSON files, load and merge in Chef and Cap
 
@@ -7,9 +6,6 @@
 * After new Capistrano deploy, make sure static content is properly updated. If not, restart NGinX on deploy
 
 == Security
-* SSH key for app user - authorized_keys for deploy user(s)
-* Additional authorized SSH keys locally, public portion only
-* ~/.ssh/authorized_keys - mode 0600
 * Support secure Git checkouts. Test w/ private repo
 * Agent forwarding for Git checkout (see Capistrano) - avoids passphraseless key requirement
 * Set app user system password at all? If so, do from ~/.deploy_credentials
