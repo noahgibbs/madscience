@@ -58,6 +58,8 @@
   "nginx": {
     "#": "See docs at http://community.opscode.com/cookbooks/nginx",
     "version": "1.4.4",
+    "sendfile": "off",
+    "#TODO": "Move sendfile off into development JSON - it's a Vagrant workaround.",
     "default_site_enabled": false
   },
   "mysql": {
