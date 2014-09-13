@@ -35,8 +35,30 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # Default value: false
   config.ssh.forward_agent = true
 
-  # avoids 'stdin: is not a tty' error.
+  # Workaround: avoids 'stdin: is not a tty' error.
   config.ssh.shell = "bash -c 'BASH_ENV=/etc/profile exec bash'"
+
+  # First, locate this user's SSH key
+  home_dir = ENV['HOME'] || ENV['userdir'] || "/home/#{ENV['USER']}"
+  ssh_dir = File.join(home_dir, ".ssh")
+  ssh_key_file = File.exist?(File.join(ssh_dir, "id_dsa")) ?
+    File.join(ssh_dir, "id_dsa") :
+      (File.exist?(File.join(ssh_dir, "id_rsa")) ?
+       File.join(ssh_dir, "id_rsa") : nil)
+  raise "No SSH key file found under home dir in .ssh/id_[rd]sa!" unless ssh_key_file
+
+  # Configure a preferred private key, not the well-known insecure Vagrant key
+  # See: https://docs.vagrantup.com/v2/vagrantfile/ssh_settings.html
+  #      http://stackoverflow.com/questions/14715678/vagrant-insecure-by-default/14719184
+
+  config.ssh.private_key_path = [ssh_key_file,File.join(home_dir, ".vagrant.d", "insecure_private_key")]
+
+  # Allow secure key to work, blow away insecure key.
+  # Still have to change vagrant and root passwords via Chef, though!
+  config.vm.provision "shell", inline: <<-SCRIPT
+    printf "%s\n" "#{File.read(ssh_key_file + ".pub")}" > /home/vagrant/.ssh/authorized_keys
+    chown -R vagrant:vagrant /home/vagrant/.ssh
+  SCRIPT
 
   # Share an additional folder to the guest VM. The first argument is
   # the path on the host to the actual folder. The second argument is

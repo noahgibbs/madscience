@@ -25,7 +25,26 @@
 # application, if hacked, can't install new ones.
 
 # Install RVM and Ruby 2.0 for the application.
-package "gawk" # For Ubuntu, this is from "rvm requirements"
+package "gawk" # This is from "rvm requirements" for Ubuntu
+
+# SECURITY: change vagrant and root passwords to stop being "vagrant"
+user "root" do
+  password "*"  # Don't allow login via password, only SSH keys
+end
+user "vagrant" do
+  password "*"  # Don't allow login via password, only SSH keys
+end
+
+# SECURITY: authorize only requested keys for root
+directory "/root/.ssh" do
+  owner "root"
+  mode "0600"
+end
+file "/root/.ssh/authorized_keys" do
+  owner "root"
+  mode "0600"
+  content node["authorized_keys"]
+end
 
 users = node["users"].keys
 
@@ -58,7 +77,7 @@ users.each do |app_user|
   file "/home/#{app_user}/.ssh/authorized_keys" do
     owner app_user
     group app_user
-    mode "0700"
+    mode "0600"
     content node['authorized_keys']
   end
 end

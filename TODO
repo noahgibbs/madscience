@@ -11,28 +11,15 @@
 * Set app user system password at all? If so, do from ~/.deploy_credentials
 * Non-root MySQL for app user, root MySQL only for migrations
 ** Needs to set up user security when creating tables. Reasonable?
-* Vagrant user security - fix before real deploy!
 
-== Security to Mention in Book
+== Databases
+* How to back up and restore MySQL remotely
+* Automatic regular backup - where to?
+
+== Mention in Book
 * http://stackoverflow.com/questions/14715678/vagrant-insecure-by-default
-
-== Vagrant user security
-Problem with vagrant/vagrant and root/vagrant and default SSH key:
-https://docs.vagrantup.com/v2/vagrantfile/ssh_settings.html
-http://stackoverflow.com/questions/14715678/vagrant-insecure-by-default/14719184
-VAGRANTFILE_API_VERSION = "2"
-
-Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
-
-# ...
-
-  config.ssh.private_key_path = ["#{ENV['HOME']}/.ssh/id_rsa","#{ENV['HOME']}/.vagrant.d/insecure_private_key"]
-
-  config.vm.provision "shell", inline: <<-SCRIPT
-    printf "%s\n" "#{File.read("#{ENV['HOME']}/.ssh/id_rsa.pub")}" > /home/vagrant/.ssh/authorized_keys
-    chown -R vagrant:vagrant /home/vagrant/.ssh
-  SCRIPT
-end
+  https://docs.vagrantup.com/v2/vagrantfile/ssh_settings.html
+  http://stackoverflow.com/questions/14715678/vagrant-insecure-by-default/14719184
 
 == Fun Ideas
 * Clone dotfiles into home dir of app users - easy poking around
