@@ -13,6 +13,7 @@
 ** Needs to set up user security when creating tables. Reasonable?
 
 == Databases
+* Randomize server root password somehow
 * How to back up and restore MySQL remotely
 * Automatic regular backup - where to?
 
