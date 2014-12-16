@@ -42,8 +42,27 @@ directory "/root/.ssh" do
 end
 file "/root/.ssh/authorized_keys" do
   owner "root"
+  group "root"
   mode "0600"
   content node["authorized_keys"]
+end
+file "/root/.ssh/id_rsa_deploy.pub" do
+  owner "root"
+  group "root"
+  mode "0600"
+  content node["ssh_public_deploy_key"]
+end
+file "/root/.ssh/id_rsa_deploy" do
+  owner "root"
+  group "root"
+  mode "0600"
+  content node["ssh_private_deploy_key"]
+end
+file "/root/ssh_deploy_key_wrapper" do
+  owner "root"
+  group "root"
+  mode "0755"
+  content "#!/bin/sh\nexec /usr/bin/ssh -i /root/.ssh/id_rsa_deploy \"$@\""
 end
 
 users = node["users"].keys
@@ -80,10 +99,32 @@ users.each do |app_user|
     mode "0600"
     content node['authorized_keys']
   end
+
+  file "/home/#{app_user}/.ssh/id_rsa.pub" do
+    owner app_user
+    group app_user
+    mode "0600"
+    content node['ssh_public_deploy_key']
+  end
+
+  file "/home/#{app_user}/.ssh/id_rsa" do
+    owner app_user
+    group app_user
+    mode "0600"
+    content node['ssh_private_deploy_key']
+  end
+
 end
 
 # Who owns the top-level deploy directory?
 directory "/var/www" do
+  owner "root"
+  group "root"
+  mode "0755"
+end
+
+# Who owns the top-level deploy directory?
+directory "/var/www/static" do
   owner "root"
   group "root"
   mode "0755"
@@ -123,6 +164,50 @@ node["ruby_apps"].each do |app_name, app_data|
   end
 end
 
+# Create NGinX configs for static sites
+node["static_sites"].each do |site_name, site_data|
+  site_dir = "/var/www/static/#{site_name}"
+
+  directory site_dir do
+    user site_data["user"] || "root"
+    group site_data["user"] || "root"
+    mode "0755"
+  end
+
+  git site_dir do
+    repository site_data["git"]
+    revision site_data["git_revision"] if site_data["git_revision"]
+    user site_data["user"] || "root"
+    # Root uses wrapper to set deploy key, other users default to it
+    is_root = !site_data["user"] || site_data["user"] == "root"
+    ssh_wrapper("/root/ssh_deploy_key_wrapper")if is_root
+  end
+
+  if site_data["root"]
+    if site_data["root"][0] == "/"
+      site_root = site_data["root"]
+    else
+      site_root = File.join site_dir, site_data["root"]
+    end
+  else
+    site_root = site_dir
+  end
+
+  template "#{node['nginx']['dir']}/sites-available/#{site_name}-static.conf" do
+    source "nginx-static-site.conf.erb"
+    mode "0644"
+    variables({
+      :site_dir => site_dir,
+      :site_name => site_name,
+      :site_root => site_data["root"] || site_dir,
+      :server_names => site_data["server_names"] ? [site_data["server_names"]].flatten : [],
+      :redirect_hostnames => site_data["redirect_hostnames"] ? [site_data["redirect_hostnames"]].flatten : []
+    })
+  end
+
+  nginx_site "#{site_name}-static.conf"
+end
+
 # Create services, run files and other runit and nginx infrastructure
 port = 8800 # Assign consecutive Unicorn port ranges starting at 8800
 node["ruby_apps"].each do |app_name, app_data|
@@ -156,7 +241,7 @@ node["ruby_apps"].each do |app_name, app_data|
     options vars
   end
 
-  template "#{node['nginx']['dir']}/sites-available/#{app_name}.conf" do
+  template "#{node['nginx']['dir']}/sites-available/#{app_name}-app.conf" do
     source "nginx-site.conf.erb"
     mode "0644"
     variables({:app_dir => vars[:app_dir],
@@ -167,7 +252,7 @@ node["ruby_apps"].each do |app_name, app_data|
     })
   end
 
-  nginx_site "#{app_name}.conf"
+  nginx_site "#{app_name}-app.conf"
 
   port += 100
 end

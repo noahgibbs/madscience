@@ -1,33 +1,17 @@
 # config valid only for Capistrano 3.1
 lock '3.2.1'
 
-# We want to share app data between Chef and Capistrano. So load
-# it here from the appropriate .json.erb file.
-require "erubis"
-require "json"
-json_erb_path = File.join(File.dirname(__FILE__), "..", "nodes", "all_nodes.json.erb")
-eruby = Erubis::Eruby.new File.read(json_erb_path)
-
-cap_json = JSON.parse eruby.result({})
-raise "Can't read JSON file for vagrant Capistrano node!" unless cap_json
-
-# We must specify which application to install. There could be multiple.
-ENV['INSTALL_APP'] ||= cap_json["ruby_apps"].keys.first
-
-raise "You must specify an INSTALL_APP variable or just have one app!" unless ENV['INSTALL_APP']
-app = cap_json["ruby_apps"][ENV['INSTALL_APP']]
-raise "Can't find app #{ENV['INSTALL_APP'].inspect} under ruby_apps in JSON!" unless app
-
-set :mysql_server_root_password, cap_json["mysql"]["server_root_password"]
-set :default_env, app["env_vars"] || {}
+set :mysql_server_root_password, $cap_json["mysql"]["server_root_password"]
+set :default_env, $app_data["env_vars"] || {}
 
 set :application, ENV['INSTALL_APP']
-set :app_db_name, app["db_name"] || (ENV['INSTALL_APP'].gsub("-", "_") + "_production")
-set :repo_url, app["git"]
+set :app_db_name, $app_data["db_name"] || (ENV['INSTALL_APP'].gsub("-", "_") + "_production")
+set :repo_url, $app_data["git"]
 # Want to use a protected Git URL, such as a GitHub SSH URL? You'll need to add the
 # SSH key to the appropriate user -- or use agent forwarding and have permissions locally.
 
-set :rails_env, app["env_vars"]["RAILS_ENV"] || app["env_vars"]["RACK_ENV"] || 'production'
+$app_data["env_vars"] ||= {}
+set :rails_env, $app_data["env_vars"]["RAILS_ENV"] || $app_data["env_vars"]["RACK_ENV"] || 'production'
 
 # Default branch is :master
 # ask :branch, proc { `git rev-parse --abbrev-ref HEAD`.chomp }.call

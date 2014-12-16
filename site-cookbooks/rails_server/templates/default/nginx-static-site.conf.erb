@@ -1,0 +1,26 @@
+<%
+  default_ness = @server_names.delete "default"
+  raise "You must not have a redirect and a primary hostname for the same host!" unless (@server_names & @redirect_hostnames).empty?
+ %>
+
+<% @redirect_hostnames.each do |re_host| %>
+server {
+  listen 80;
+  server_name <%= re_host %> ;
+  rewrite ^/(.*) http://<%= @server_names[0] %>/$1 permanent;
+}
+<% end %>
+
+server {
+    listen 80 <%= default_ness %>;
+    server_name <%= @server_names.join " " %> ;
+
+    #access_log <%= @site_dir %>/shared/log/nginx_access.log;
+    #error_log <%= @site_dir %>/shared/log/nginx_error.log;
+
+    root <%= @site_root %>;
+
+    try_files $uri/index.html $uri @<%= @site_name %>;
+
+    error_page 500 502 503 504 /500.html;
+}

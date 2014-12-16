@@ -99,7 +99,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   creds_dir = File.join(home_dir, '.deploy_credentials')
 
   # Read local credentials and pass them to Chef
-  #chef_json['ssh_public_key'] = File.read File.join(creds_dir, 'id_rsa_4096.pub')
+  chef_json['ssh_public_provisioning_key'] = File.read File.join(creds_dir, 'id_rsa_provisioning_4096.pub')
+  chef_json['ssh_private_provisioning_key'] = File.read File.join(creds_dir, 'id_rsa_provisioning_4096')
+  chef_json['ssh_public_deploy_key'] = File.read File.join(creds_dir, 'id_rsa_deploy_4096.pub')
+  chef_json['ssh_private_deploy_key'] = File.read File.join(creds_dir, 'id_rsa_deploy_4096')
   chef_json['authorized_keys'] = File.read File.join(creds_dir, 'authorized_keys')
 
   # Enable provisioning with chef solo, specifying a cookbooks path, roles
