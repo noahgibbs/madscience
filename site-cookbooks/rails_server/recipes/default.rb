@@ -100,6 +100,14 @@ users.each do |app_user|
     content node['authorized_keys']
   end
 
+  file "/home/#{app_user}/.ssh/config" do
+    owner app_user
+    group app_user
+    mode "0600"
+    # If we're going to clone from unknown Git hosts...
+    content "Host *\n\tStrictHostKeyChecking no\n"
+  end
+
   file "/home/#{app_user}/.ssh/id_rsa.pub" do
     owner app_user
     group app_user
@@ -177,10 +185,11 @@ node["static_sites"].each do |site_name, site_data|
   git site_dir do
     repository site_data["git"]
     revision site_data["git_revision"] if site_data["git_revision"]
-    user site_data["user"] || "root"
+    username = site_data["user"] || root
+    user username
     # Root uses wrapper to set deploy key, other users default to it
-    is_root = !site_data["user"] || site_data["user"] == "root"
-    ssh_wrapper("/root/ssh_deploy_key_wrapper")if is_root
+    is_root = (username == "root")
+    ssh_wrapper "/root/ssh_deploy_key_wrapper" if is_root
   end
 
   if site_data["root"]
