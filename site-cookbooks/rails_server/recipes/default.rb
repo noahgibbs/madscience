@@ -65,7 +65,18 @@ file "/root/ssh_deploy_key_wrapper" do
   content "#!/bin/sh\nexec /usr/bin/ssh -i /root/.ssh/id_rsa_deploy \"$@\""
 end
 
-users = node["users"].keys
+users = []
+if node["users"].is_a?(Hash)
+  users = node["users"].keys
+elsif node["users"].is_a?(Array)
+  users = node["users"].to_a
+else
+  raise "Unrecognized 'users' entry in JSON: #{users.inspect}!"
+end
+
+# Any unmentioned users from apps or sites should get created too.
+add_users = ((node["ruby_apps"] || {}).values + (node["static_sites"] || {}).values).map { |h| h["user"] }.compact.uniq
+users += add_users
 
 # Use RVM's user_install recipe. Seems to be no LWRP equivalent.
 # That means setting attributes.
@@ -100,14 +111,6 @@ users.each do |app_user|
     content node['authorized_keys']
   end
 
-  file "/home/#{app_user}/.ssh/config" do
-    owner app_user
-    group app_user
-    mode "0600"
-    # If we're going to clone from unknown Git hosts...
-    content "Host *\n\tStrictHostKeyChecking no\n"
-  end
-
   file "/home/#{app_user}/.ssh/id_rsa.pub" do
     owner app_user
     group app_user
@@ -139,7 +142,7 @@ directory "/var/www/static" do
 end
 
 # Create databases for applications
-node["ruby_apps"].each do |app_name, app_data|
+(node["ruby_apps"] || []).each do |app_name, app_data|
   db_name = app_data["db_name"] || (app_name.gsub("-", "_") + "_production")
   mysql_database db_name do
     connection(
@@ -149,10 +152,20 @@ node["ruby_apps"].each do |app_name, app_data|
     )
     action :create
   end
+
+  (app_data["packages"] || []).each do |pkg|
+    if pkg.is_a?(String)
+      package pkg
+    elsif pkg.respond_to?(:each) && pkg.size == 2
+      package pkg[0] { version pkg[1] }
+    else
+      raise "Unrecognized package specification: #{pkg.inspect}!"
+    end
+  end
 end
 
 # Create application directories for Capistrano to deploy to
-node["ruby_apps"].each do |app_name, app_data|
+(node["ruby_apps"] || []).each do |app_name, app_data|
   directory "/var/www/#{app_name}" do
     owner app_data["user"]
     group app_data["user"]
@@ -173,7 +186,7 @@ node["ruby_apps"].each do |app_name, app_data|
 end
 
 # Create NGinX configs for static sites
-node["static_sites"].each do |site_name, site_data|
+(node["static_sites"] || []).each do |site_name, site_data|
   site_dir = "/var/www/static/#{site_name}"
 
   directory site_dir do
@@ -185,11 +198,10 @@ node["static_sites"].each do |site_name, site_data|
   git site_dir do
     repository site_data["git"]
     revision site_data["git_revision"] if site_data["git_revision"]
-    username = site_data["user"] || root
-    user username
+    user site_data["user"] || "root"
     # Root uses wrapper to set deploy key, other users default to it
-    is_root = (username == "root")
-    ssh_wrapper "/root/ssh_deploy_key_wrapper" if is_root
+    is_root = !site_data["user"] || site_data["user"] == "root"
+    ssh_wrapper("/root/ssh_deploy_key_wrapper")if is_root
   end
 
   if site_data["root"]
@@ -219,7 +231,7 @@ end
 
 # Create services, run files and other runit and nginx infrastructure
 port = 8800 # Assign consecutive Unicorn port ranges starting at 8800
-node["ruby_apps"].each do |app_name, app_data|
+(node["ruby_apps"] || []).each do |app_name, app_data|
   ruby_version = "ruby-2.0.0-p481" # TODO: Make settable per-app
   rvm_dir = "/home/#{app_data["user"]}/.rvm/"
 
