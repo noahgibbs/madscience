@@ -10,7 +10,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # please see the online documentation at vagrantup.com.
 
   # Every Vagrant virtual environment requires a box to build off of.
-  config.vm.box = "hashicorp/precise64"
+  config.vm.box = "ubuntu/trusty64"
 
   # The url from where the 'config.vm.box' box will be fetched if it
   # doesn't already exist on the user's system.
@@ -51,11 +51,15 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # See: https://docs.vagrantup.com/v2/vagrantfile/ssh_settings.html
   #      http://stackoverflow.com/questions/14715678/vagrant-insecure-by-default/14719184
 
+  #config.ssh.private_key_path = [ssh_key_file]
+  # Need insecure to bootstrap, but we blow away the vagrant user's
+  # authorized keys below (root, too, but in the Chef cookbook.)
   config.ssh.private_key_path = [ssh_key_file,File.join(home_dir, ".vagrant.d", "insecure_private_key")]
 
   # Allow secure key to work, blow away insecure key.
   # Still have to change vagrant and root passwords via Chef, though!
   config.vm.provision "shell", inline: <<-SCRIPT
+    # TODO: add provisioning key to authorized_keys file
     printf "%s\n" "#{File.read(ssh_key_file + ".pub")}" > /home/vagrant/.ssh/authorized_keys
     chown -R vagrant:vagrant /home/vagrant/.ssh
   SCRIPT
@@ -70,14 +74,14 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # backing providers for Vagrant. These expose provider-specific options.
   # Example for VirtualBox:
   #
-  # config.vm.provider "virtualbox" do |vb|
-  #   # Don't boot with headless mode
-  #   vb.gui = true
-  #
-  #   # Use VBoxManage to customize the VM. For example to change memory:
-  #   vb.customize ["modifyvm", :id, "--memory", "1024"]
-  # end
-  #
+  config.vm.provider "virtualbox" do |vb|
+    # Don't boot with headless mode
+    #vb.gui = true
+
+    # Use VBoxManage to customize the VM. For example to change memory:
+    #vb.customize ["modifyvm", :id, "--memory", "1024"]
+  end
+
   # View the documentation for the provider you're using for more
   # information on available options.
 
@@ -104,6 +108,23 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   chef_json['ssh_public_deploy_key'] = File.read File.join(creds_dir, 'id_rsa_deploy_4096.pub')
   chef_json['ssh_private_deploy_key'] = File.read File.join(creds_dir, 'id_rsa_deploy_4096')
   chef_json['authorized_keys'] = File.read File.join(creds_dir, 'authorized_keys')
+
+  config.vm.provider :digital_ocean do |provider, override|
+    # Above, we use this user's main key for the Vagrant user.
+    # That's not necessarily as secure as we want for off-machine use.
+    # It means you can't directly SSH in without specifying an SSH
+    # key for off-machine use... Which is, honestly, probably a really
+    # good idea.
+    override.ssh.private_key_path = File.join home_dir, '.deploy_credentials', 'id_rsa_provisioning_4096'
+    override.vm.box = 'digital_ocean'
+    override.vm.box_url = "https://github.com/smdahlen/vagrant-digitalocean/raw/master"
+
+    provider.token = File.read(File.join(creds_dir, 'digital_ocean_token')).strip
+    provider.image = 'ubuntu-14-04-x64'
+    provider.region = 'nyc2'
+    provider.size = '1gb'
+    # provider.setup false  # Can we do this?
+  end
 
   # Enable provisioning with chef solo, specifying a cookbooks path, roles
   # path, and data_bags path (all relative to this Vagrantfile), and adding
