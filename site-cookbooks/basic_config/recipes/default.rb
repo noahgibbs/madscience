@@ -6,9 +6,6 @@
 # Your application(s) shouldn't run as root.
 # Each should have a username assigned to it.
 
-# Allow Chef to set passwords
-package "libshadow-ruby1.8"
-
 node["users"].each do |app_user, user_data|
   # Set up app-specific user, group and home directory
   user app_user do
