@@ -124,7 +124,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     provider.region = 'nyc2'
     provider.size = '1gb'
     # provider.setup false  # Can we do this?
-  end
+  end if File.exist?(File.join(creds_dir, 'digital_ocean_token'))
 
   # Enable provisioning with chef solo, specifying a cookbooks path, roles
   # path, and data_bags path (all relative to this Vagrantfile), and adding
