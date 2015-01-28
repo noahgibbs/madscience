@@ -115,7 +115,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     # It means you can't directly SSH in without specifying an SSH
     # key for off-machine use... Which is, honestly, probably a really
     # good idea.
-    override.ssh.private_key_path = File.join home_dir, '.deploy_credentials', 'id_rsa_provisioning_4096'
+    override.ssh.private_key_path = File.join home_dir, '.deploy_credentials', 'digital_ocean_ssh_key'
     override.vm.box = 'digital_ocean'
     override.vm.box_url = "https://github.com/smdahlen/vagrant-digitalocean/raw/master"
 
