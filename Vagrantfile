@@ -93,13 +93,28 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   chef_json['ssh_private_deploy_key'] = File.read File.join(creds_dir, 'id_rsa_deploy_4096')
   chef_json['authorized_keys'] = File.read File.join(creds_dir, 'authorized_keys')
 
+  config.vm.provider :aws do |provider, override|
+    override.vm.box = 'dummy'
+    override.vm.box_url = 'https://github.com/mitchellh/vagrant-aws/raw/master/dummy.box'
+
+    provider.ami = 'ami-37eab407'
+    raise "Can't find aws.json in #{creds_dir}! Set one up first!" unless File.exist? File.join(creds_dir, "aws.json")
+    aws_options = JSON.parse File.read File.join(creds_dir, "aws.json")
+    aws_options.each do |key, value|
+      next if key[0] == "#"  # Skip JSON 'comments'
+
+      if key == "access_key_id" && value == ""
+        raise "Hey! You have to edit aws.json in #{creds_dir} and set up your AWS credentials first!"
+      end
+
+      # Getting an error on this send? You may have set a property in the JSON that doesn't exist.
+      # See https://github.com/mitchellh/vagrant-aws, section "Configuration", for a list of
+      # current valid properties.
+      provider.send("#{key}=", value)
+    end
+  end
+
   config.vm.provider :digital_ocean do |provider, override|
-    # Above, we use this user's main key for the Vagrant user.
-    # That's not necessarily as secure as we want for off-machine use.
-    # It means you can't directly SSH in without specifying an SSH
-    # key for off-machine use... Which is, honestly, probably a really
-    # good idea.
-    override.ssh.private_key_path = File.join home_dir, '.deploy_credentials', 'digital_ocean_ssh_key'
     override.vm.box = 'digital_ocean'
     override.vm.box_url = "https://github.com/smdahlen/vagrant-digitalocean/raw/master"
 
