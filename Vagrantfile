@@ -103,7 +103,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   ["digital_ocean", "aws", "linode", "development"].each do |host_provider|
     config.push.define(host_provider, strategy: "local-exec") do |push|
       rails_apps = chef_json["ruby_apps"].keys
-      push.inline = rails_apps.map { |app| "INSTALL_APP=#{app} cap deploy #{host_provider}" }.join("\n")
+      push.inline = rails_apps.map { |app| "echo Deploying #{app}...\nINSTALL_APP=#{app} cap deploy #{host_provider}" }.join("\n")
     end
   end
 
