@@ -8,7 +8,7 @@ server 'localhost',
   roles: %w{web app db},
   ssh_options: {
     #user: 'user_name', # overrides user setting above
-    keys: [ File.join(home_dir, ".deploy_credentials", "id_rsa_4096") ],
+    keys: [ File.join(home_dir, ".deploy_credentials", "id_rsa_deploy_4096") ],
     forward_agent: true,
     auth_methods: %w(publickey),
     port: 2222,
