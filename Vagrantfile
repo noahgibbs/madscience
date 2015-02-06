@@ -87,11 +87,25 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   creds_dir = File.join(home_dir, '.deploy_credentials')
 
   # Read local credentials and pass them to Chef
+  # We need to pass in the private deploy key so that Capistrano can clone your Git repo from the host
   chef_json['ssh_public_provisioning_key'] = File.read File.join(creds_dir, 'id_rsa_provisioning_4096.pub')
-  chef_json['ssh_private_provisioning_key'] = File.read File.join(creds_dir, 'id_rsa_provisioning_4096')
+  #chef_json['ssh_private_provisioning_key'] = File.read File.join(creds_dir, 'id_rsa_provisioning_4096')
   chef_json['ssh_public_deploy_key'] = File.read File.join(creds_dir, 'id_rsa_deploy_4096.pub')
   chef_json['ssh_private_deploy_key'] = File.read File.join(creds_dir, 'id_rsa_deploy_4096')
-  chef_json['authorized_keys'] = File.read File.join(creds_dir, 'authorized_keys')
+
+  # For authorized keys, let in anybody you specified in ~/.deploy_credentials/authorized_keys, plus the
+  # provisioning and deploy keys.
+  chef_json['authorized_keys'] = [
+    File.read(File.join(creds_dir, 'authorized_keys')),
+    chef_json['ssh_public_deploy_key'],
+    chef_json['ssh_public_provisioning_key'] ].join("\n")
+
+  ["digital_ocean", "aws", "linode", "development"].each do |host_provider|
+    config.push.define(host_provider, strategy: "local-exec") do |push|
+      rails_apps = chef_json["ruby_apps"].keys
+      push.inline = rails_apps.map { |app| "INSTALL_APP=#{app} cap deploy #{host_provider}" }.join("\n")
+    end
+  end
 
   config.vm.provider :aws do |provider, override|
     override.vm.box = 'dummy'
@@ -103,27 +117,36 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     aws_options.each do |key, value|
       next if key[0] == "#"  # Skip JSON 'comments'
 
-      if key == "access_key_id" && value == ""
-        raise "Hey! You have to edit aws.json in #{creds_dir} and set up your AWS credentials first!"
-      end
+      # How do we detect that this is the provider actually being used right now?
+      #if key == "access_key_id" && value == ""
+      #  raise "Hey! You have to edit aws.json in #{creds_dir} and set up your AWS credentials first!"
+      #end
 
-      # Getting an error on this send? You may have set a property in the JSON that doesn't exist.
-      # See https://github.com/mitchellh/vagrant-aws, section "Configuration", for a list of
-      # current valid properties.
+      # Getting an error on the following line? You may have set a property in the JSON
+      # that doesn't exist.  See https://github.com/mitchellh/vagrant-aws,
+      # section "Configuration", for a list of current valid properties.
       provider.send("#{key}=", value)
     end
   end
 
   config.vm.provider :digital_ocean do |provider, override|
+    override.ssh.private_key_path = File.join creds_dir, "id_rsa_provisioning_4096"
     override.vm.box = 'digital_ocean'
     override.vm.box_url = "https://github.com/smdahlen/vagrant-digitalocean/raw/master"
 
-    provider.token = File.read(File.join(creds_dir, 'digital_ocean_token')).strip
-    provider.image = 'ubuntu-14-04-x64'
-    provider.region = 'nyc2'
-    provider.size = '1gb'
-    # provider.setup false  # Can we do this?
-  end if File.exist?(File.join(creds_dir, 'digital_ocean_token'))
+    raise "Can't find digital_ocean.json in #{creds_dir}! Set one up first!" unless File.exist? File.join(creds_dir, "digital_ocean.json")
+    do_options = JSON.parse File.read File.join(creds_dir, "digital_ocean.json")
+
+    do_options.each do |key, value|
+      next if key[0] == "#"  # Skip JSON 'comments'
+
+      # Getting an error on this send? You may have set a property in the JSON
+      # that doesn't exist.  See
+      # https://github.com/smdahlen/vagrant-digitalocean, section "Supported
+      # Configuration Attributes", for a list of current valid properties.
+      provider.send("#{key}=", value)
+    end
+  end if File.exist?(File.join(creds_dir, 'digital_ocean.json'))
 
   # Enable provisioning with chef solo, specifying a cookbooks path, roles
   # path, and data_bags path (all relative to this Vagrantfile), and adding
