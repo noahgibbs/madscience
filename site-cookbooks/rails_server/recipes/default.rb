@@ -77,6 +77,7 @@ end
 # Any unmentioned users from apps or sites should get created too.
 add_users = ((node["ruby_apps"] || {}).values + (node["static_sites"] || {}).values).map { |h| h["user"] }.compact.uniq
 users += add_users
+users.uniq!
 
 # Use RVM's user_install recipe. Seems to be no LWRP equivalent.
 # That means setting attributes.
@@ -201,7 +202,7 @@ end
     user site_data["user"] || "root"
     # Root uses wrapper to set deploy key, other users default to it
     is_root = !site_data["user"] || site_data["user"] == "root"
-    ssh_wrapper("/root/ssh_deploy_key_wrapper")if is_root
+    ssh_wrapper("/root/ssh_deploy_key_wrapper") if is_root
   end
 
   if site_data["root"]
