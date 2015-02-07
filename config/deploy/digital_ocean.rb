@@ -1,23 +1,23 @@
 # First, get Digital Ocean settings
 
 # Parse output of ssh-config. Example:
-#Host default
-#  HostName 127.0.0.1
-#  User vagrant
-#  Port 2222
-#  UserKnownHostsFile /dev/null
-#  StrictHostKeyChecking no
-#  PasswordAuthentication no
-#  IdentityFile /Users/noah/Dropbox/src/madscience/deploy_repo/.vagrant/machines/default/virtualbox/private_key
-#  IdentitiesOnly yes
-#  LogLevel FATAL
-#  ForwardAgent yes
+# Host default
+#   HostName 104.131.251.227
+#   User root
+#   Port 22
+#   UserKnownHostsFile /dev/null
+#   StrictHostKeyChecking no
+#   PasswordAuthentication no
+#   IdentityFile /Users/noah/.deploy_credentials/id_rsa_provisioning_4096
+#   IdentitiesOnly yes
+#   LogLevel FATAL
+#   ForwardAgent yes
+
 conf = `vagrant ssh-config`
 ssh_opts = {}
 conf.split("\n").map(&:strip).split(" ", 2).each { |key, val| ssh_opts[key] = val }
 
-
-server 'localhost',
+server conf['HostName'],
   user: 'www',
   roles: %w{web app db},
   ssh_options: {
