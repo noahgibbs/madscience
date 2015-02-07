@@ -126,6 +126,13 @@ users.each do |app_user|
     content node['ssh_private_deploy_key']
   end
 
+  file "/home/#{app_user}/ssh_deploy_key_wrapper.sh" do
+    owner app_user
+    group app_user
+    mode "0755"
+    content "#!/bin/sh\nexec /usr/bin/ssh -i /home/#{app_user}/.ssh/id_rsa \"$@\""
+  end
+
 end
 
 # Who owns the top-level deploy directory?
@@ -200,9 +207,14 @@ end
     repository site_data["git"]
     revision site_data["git_revision"] if site_data["git_revision"]
     user site_data["user"] || "root"
-    # Root uses wrapper to set deploy key, other users default to it
+
+    # Use wrapper to set deploy key
     is_root = !site_data["user"] || site_data["user"] == "root"
-    ssh_wrapper("/root/ssh_deploy_key_wrapper") if is_root
+    if is_root
+      ssh_wrapper("/root/ssh_deploy_key_wrapper")
+    else
+      ssh_wrapper("/home/#{site_data["user"]}/ssh_deploy_key_wrapper")
+    end
   end
 
   if site_data["root"]
