@@ -13,20 +13,26 @@
 #   LogLevel FATAL
 #   ForwardAgent yes
 
-conf = `vagrant ssh-config`
+ssh_conf = `vagrant ssh-config`
 ssh_opts = {}
-conf.split("\n").map(&:strip).split(" ", 2).each { |key, val| ssh_opts[key] = val }
+ssh_conf.split("\n").map(&:strip).each { |line| key, val = line.split(/\s+/, 2); ssh_opts[key] = val }
 
-server conf['HostName'],
-  user: 'www',
+home_dir = ENV['HOME'] || ENV['userdir'] || "/home/#{ENV['USER']}"
+creds_dir = File.join home_dir, ".deploy_credentials"
+
+app_user = 'www'  # FIXME
+
+server ssh_opts['HostName'],
+  user: app_user,
   roles: %w{web app db},
   ssh_options: {
     #user: 'user_name', # overrides user setting above
-    keys: [ File.join(home_dir, ".deploy_credentials", "id_rsa_deploy_4096") ],
+    keys: [ File.join(creds_dir, "id_rsa_deploy_4096") ],
     forward_agent: true,
     auth_methods: %w(publickey),
-    port: 2222,
-    # password: 'please use keys'
+    port: ssh_opts['Port'],
+    paranoid: false,  # Unfortunately, real hosting services often reassign IPs
+    # password: 'please use only keys'
   }
 
 # Simple Role Syntax
