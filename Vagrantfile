@@ -102,10 +102,19 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     chef_json['ssh_public_deploy_key'],
     chef_json['ssh_public_provisioning_key'] ].join("\n")
 
+  # Can't run capistrano under Bundler -- it's not in Vagrant's set of gems.
+  # Can't use the normal capistrano-push plugin for Vagrant, it only pushes one app.
+  # So instead, we make a bash script that unsets Ruby-, Gem- and Bundler-related
+  # environment variables, then pushes everything.
   ["digital_ocean", "aws", "linode", "development"].each do |host_provider|
     config.push.define(host_provider, strategy: "local-exec") do |push|
       rails_apps = chef_json["ruby_apps"].keys
-      push.inline = rails_apps.map { |app| "echo Deploying #{app}...\nINSTALL_APP=#{app} cap deploy #{host_provider}" }.join("\n")
+      app_lines = rails_apps.map { |app| "echo Deploying #{app}...\nINSTALL_APP=#{app} bundle exec cap deploy #{host_provider}" }.join("\n")
+      push.inline = <<-SCRIPT_START + app_lines
+#!/bin/bash -l
+# List of unset variables from Vagrant::Util::Env.with_clean_env
+unset -v _ORIGINAL_GEM_PATH GEM_PATH GEM_HOME GEM_ROOT BUNDLE_BIN_PATH BUNDLE_GEMFILE RUBYLIB RUBYOPT RUBY_ENGINE RUBY_ROOT RUBY_VERSION
+      SCRIPT_START
     end
   end
 
