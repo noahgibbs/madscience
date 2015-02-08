@@ -58,7 +58,7 @@ file "/root/.ssh/id_rsa_deploy" do
   mode "0600"
   content node["ssh_private_deploy_key"]
 end
-file "/root/ssh_deploy_key_wrapper" do
+file "/root/ssh_deploy_key_wrapper.sh" do
   owner "root"
   group "root"
   mode "0755"
@@ -211,9 +211,9 @@ end
     # Use wrapper to set deploy key
     is_root = !site_data["user"] || site_data["user"] == "root"
     if is_root
-      ssh_wrapper("/root/ssh_deploy_key_wrapper")
+      ssh_wrapper("/root/ssh_deploy_key_wrapper.sh")
     else
-      ssh_wrapper("/home/#{site_data["user"]}/ssh_deploy_key_wrapper")
+      ssh_wrapper("/home/#{site_data["user"]}/ssh_deploy_key_wrapper.sh")
     end
   end
 
