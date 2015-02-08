@@ -62,7 +62,7 @@ file "/root/ssh_deploy_key_wrapper.sh" do
   owner "root"
   group "root"
   mode "0755"
-  content "#!/bin/sh\nexec /usr/bin/ssh -i /root/.ssh/id_rsa_deploy \"$@\""
+  content "#!/bin/sh\nexec /usr/bin/ssh -i /root/.ssh/id_rsa_deploy -o StrictHostKeyChecking=no \"$@\""
 end
 
 users = []
@@ -130,7 +130,7 @@ users.each do |app_user|
     owner app_user
     group app_user
     mode "0755"
-    content "#!/bin/sh\nexec /usr/bin/ssh -i /home/#{app_user}/.ssh/id_rsa \"$@\""
+    content "#!/bin/sh\nexec /usr/bin/ssh -i /home/#{app_user}/.ssh/id_rsa -o StrictHostKeyChecking=no \"$@\""
   end
 
 end
