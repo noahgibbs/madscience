@@ -109,9 +109,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   ["digital_ocean", "aws", "linode", "development"].each do |host_provider|
     config.push.define(host_provider, strategy: "local-exec") do |push|
       rails_apps = chef_json["ruby_apps"].keys
-      app_lines = rails_apps.map { |app| "echo Deploying #{app}...\nINSTALL_APP=#{app} bundle exec cap deploy #{host_provider}" }.join("\n")
+      app_lines = rails_apps.map { |app| "echo Deploying #{app}...\npwd\nenv\nbash -l -c \"INSTALL_APP=#{app} bundle exec cap #{host_provider} deploy\"" }.join("\n")
       push.inline = <<-SCRIPT_START + app_lines
-#!/bin/bash -l
 # List of unset variables from Vagrant::Util::Env.with_clean_env
 unset -v _ORIGINAL_GEM_PATH GEM_PATH GEM_HOME GEM_ROOT BUNDLE_BIN_PATH BUNDLE_GEMFILE RUBYLIB RUBYOPT RUBY_ENGINE RUBY_ROOT RUBY_VERSION
       SCRIPT_START
