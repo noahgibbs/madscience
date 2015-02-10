@@ -7,8 +7,9 @@ set :default_env, $app_data["env_vars"] || {}
 set :application, ENV['INSTALL_APP']
 set :app_db_name, $app_data["db_name"] || (ENV['INSTALL_APP'].gsub("-", "_") + "_production")
 set :repo_url, $app_data["git"]
-# Want to use a protected Git URL, such as a GitHub SSH URL? You'll need to add the
-# SSH key to the appropriate user -- or use agent forwarding and have permissions locally.
+
+# Set to the app's Ruby version
+set :rvm_ruby_version, '2.0.0-p481'  # Where does this default go? Also, make it settable per-app
 
 $app_data["env_vars"] ||= {}
 set :rails_env, $app_data["env_vars"]["RAILS_ENV"] || $app_data["env_vars"]["RACK_ENV"] || 'production'
