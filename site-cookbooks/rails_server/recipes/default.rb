@@ -89,7 +89,7 @@ include_recipe "database::mysql"
 users.each do |app_user|
   # Install RVM and Ruby for each user
 
-  ruby_version = "2.0.0-p481"  # TODO: get from JSON
+  ruby_version = "2.0.0-p598"  # TODO: get from JSON
 
   rvm_ruby ruby_version do
     user app_user
@@ -253,7 +253,7 @@ end
 # Create services, run files and other runit and nginx infrastructure
 port = 8800 # Assign consecutive Unicorn port ranges starting at 8800
 (node["ruby_apps"] || []).each do |app_name, app_data|
-  ruby_version = "ruby-2.0.0-p481" # TODO: Make settable per-app
+  ruby_version = "ruby-2.0.0-p598" # TODO: Make settable per-app
   rvm_dir = "/home/#{app_data["user"]}/.rvm/"
 
   vars = {

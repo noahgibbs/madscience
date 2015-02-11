@@ -9,7 +9,7 @@ set :app_db_name, $app_data["db_name"] || (ENV['INSTALL_APP'].gsub("-", "_") + "
 set :repo_url, $app_data["git"]
 
 # Set to the app's Ruby version
-set :rvm_ruby_version, '2.0.0-p481'  # Where does this default go? Also, make it settable per-app
+set :rvm_ruby_version, '2.0.0-p598'  # Where does this default go? Also, make it settable per-app
 
 $app_data["env_vars"] ||= {}
 set :rails_env, $app_data["env_vars"]["RAILS_ENV"] || $app_data["env_vars"]["RACK_ENV"] || 'production'
