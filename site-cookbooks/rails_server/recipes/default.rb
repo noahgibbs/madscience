@@ -88,18 +88,22 @@ include_recipe "database::mysql"
 
 users.each do |app_user|
   # Install RVM and Ruby for each user
-  rvm_ruby "2.0.0-p481" do
+
+  ruby_version = "2.0.0-p481"  # TODO: get from JSON
+
+  rvm_ruby ruby_version do
     user app_user
   end
 
-  rvm_default_ruby "2.0.0-p481" do
+  rvm_default_ruby ruby_version do
     user app_user
   end
 
   # Test RVM install
   rvm_shell 'echo ruby' do
     user app_user
-    code 'echo My Ruby is `rvm current`!'
+    ruby_string ruby_version
+    code 'echo My Ruby is `rvm current`!'  # Use bash backticks to return the current Ruby version
     returns [0]
   end
 
