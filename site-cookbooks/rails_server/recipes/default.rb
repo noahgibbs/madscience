@@ -88,6 +88,10 @@ include_recipe "database::mysql"
 
 users.each do |app_user|
   # Install RVM and Ruby for each user
+  rvm_ruby "2.0.0-p481" do
+    user app_user
+  end
+
   rvm_default_ruby "2.0.0-p481" do
     user app_user
   end
