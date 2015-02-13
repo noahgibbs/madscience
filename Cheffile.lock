@@ -48,7 +48,6 @@ SITE
       yum (>= 3.0.0)
 
 DEPENDENCIES
-  apt (= 2.4.0)
   database (>= 0)
   mysql (= 5.3.6)
   nginx (= 2.7.4)

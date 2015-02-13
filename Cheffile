@@ -1,14 +1,56 @@
 #!/usr/bin/env ruby
 #^syntax detection
 
+# This file is a bit of a hack, an attempt to make the one-file mirage of
+# all_nodes.json.erb work properly while not limiting you to purely
+# off-the-shelf cookbooks.
+#
+# Cookbooks required by the deploy repo itself are specified here, usually
+# with specific versions. That's to make sure that, say, the NGinX and MySQL
+# cookbooks are well-tested with the code to make them work. But if you mess
+# with all_nodes.json.erb to add more cookbooks, by default that should work
+# too.
+#
+# However, "works by default" has some limits. If you include cookbooks in the
+# run list, we'll try to load them from the site(s) below -- mostly the
+# OpsCode community site -- by name, with no further information. If you want
+# to load a non-standard site or cookbook, or load a cookbook from a git repo,
+# or limit it to specific versions, you're going to need to edit this file as
+# you normally would with a Cheffile or Berksfile.
+
+# Note to Berkshelf users: this is for librarian-chef, which is basically the
+# same thing as Berkshelf and works basically the same way. Yup, it's Bundler
+# for Chef.
+
+# Read in all_nodes.json.erb
+require "json"
+require "erubis"
+nodes_data = File.read File.join("nodes", "all_nodes.json.erb")
+eruby = Erubis::Eruby.new nodes_data
+nodes_json = JSON.parse eruby.result({})
+
+# Now, get the cookbooks from the run list
+run_list = nodes_json["run_list"]
+run_list_cookbooks = run_list.map { |s| s.split("::", 2)[0] }.uniq
+
+# These two are supplied by the deploy repo itself
+run_list_cookbooks -= [ "basic_config", "rails_server" ]
+# These are given by specific versions down below. If you remove
+# those lines, you have to remove them here too!
+run_list_cookbooks -= ["runit", "nginx", "mysql", "database", "rvm"]
+
 site 'http://community.opscode.com/api/v1'
 
-cookbook 'apt', '2.4.0'
+# You can give specific sources and versions down here. It's safer to,
+# but we want this to work regardless.
+#cookbook 'apt', '2.4.0'
 cookbook 'runit', '1.5.10'
 cookbook 'nginx', '2.7.4'
 cookbook 'mysql', '5.3.6'
 cookbook 'database'
 cookbook 'rvm', '0.9.2'
+
+
 
 # cookbook 'chef-client'
 
