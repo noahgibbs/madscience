@@ -84,7 +84,18 @@ users.uniq!
 node.default["rvm"]["user_installs"] = users.map { |u| { 'user' => u } }
 include_recipe "rvm::user_install"
 include_recipe "runit"
-include_recipe "database::mysql"
+
+# Using MySQL or Postgres?
+has_mysql = node["madscience_run_list"].any? { |s| s["mysql"] }
+has_postgres = node["madscience_run_list"].any? { |s| s["postgres"] }
+
+raise "Can't use both Postgres and MySQL on one node!" if has_mysql && has_postgres
+
+if has_mysql
+  include_recipe "database::mysql"
+elsif has_postgres
+  include_recipe "database::postgres"
+end
 
 users.each do |app_user|
   # Install RVM and Ruby for each user
@@ -160,13 +171,24 @@ end
 # Create databases for applications
 (node["ruby_apps"] || []).each do |app_name, app_data|
   db_name = app_data["db_name"] || (app_name.gsub("-", "_") + "_production")
-  mysql_database db_name do
-    connection(
-      :host     => 'localhost',
-      :username => 'root',
-      :password => node['mysql']['server_root_password']
-    )
-    action :create
+  if has_mysql
+    mysql_database db_name do
+      connection(
+        :host     => 'localhost',
+        :username => 'root',
+        :password => node['mysql']['server_root_password']
+      )
+      action :create
+    end
+  elsif has_postgres
+    postgres_database db_name do
+      connection(
+        :host     => 'localhost',
+        :username => 'root',
+        :password => node['postgresql']['server_root_password']
+      )
+      action :create
+    end
   end
 
   (app_data["packages"] || []).each do |pkg|

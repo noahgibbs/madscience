@@ -175,6 +175,7 @@ unset -v _ORIGINAL_GEM_PATH GEM_PATH GEM_HOME GEM_ROOT BUNDLE_BIN_PATH BUNDLE_GE
 
     # You may also specify custom JSON attributes:
     run_list = chef_json.delete 'run_list'
+    chef_json["madscience_run_list"] = run_list  # Pass in a copy not named run_list
     chef.json = chef_json
     chef.run_list = run_list
   end
