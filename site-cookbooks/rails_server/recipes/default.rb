@@ -87,14 +87,14 @@ include_recipe "runit"
 
 # Using MySQL or Postgres?
 has_mysql = node["madscience_run_list"].any? { |s| s["mysql"] }
-has_postgres = node["madscience_run_list"].any? { |s| s["postgres"] }
+has_postgresql = node["madscience_run_list"].any? { |s| s["postgresql"] }
 
-raise "Can't use both Postgres and MySQL on one node!" if has_mysql && has_postgres
+raise "Can't use both Postgres and MySQL on one node!" if has_mysql && has_postgresql
 
 if has_mysql
   include_recipe "database::mysql"
-elsif has_postgres
-  include_recipe "database::postgres"
+elsif has_postgresql
+  include_recipe "database::postgresql"
 end
 
 users.each do |app_user|
@@ -180,8 +180,8 @@ end
       )
       action :create
     end
-  elsif has_postgres
-    postgres_database db_name do
+  elsif has_postgresql
+    postgresql_database db_name do
       connection(
         :host     => 'localhost',
         :username => 'root',
