@@ -72,7 +72,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # information on available options.
 
   # Use this specific, not-default-for-Vagrant Chef version
-  config.omnibus.chef_version = "11.12.8"
+  config.omnibus.chef_version = "12.0.3"
 
   # The file nodes/vagrant.json contains the Chef attributes,
   # plus a run_list.
@@ -111,7 +111,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       rails_apps = chef_json["ruby_apps"].keys
       # Combination of clean env, bundle exec and subshell taken from mfenner's vagrant-capistrano-push plugin.
       # Plus use a login subshell to make sure rvm is all set up.
-      app_lines = rails_apps.map { |app| "echo Deploying #{app}...\npwd\nenv\nbash -l -c \"INSTALL_APP=#{app} bundle exec cap #{host_provider} deploy\"" }.join("\n")
+      app_lines = rails_apps.map { |app| "echo Deploying #{app}...\nbash -l -c \"INSTALL_APP=#{app} bundle exec cap #{host_provider} deploy\"" }.join("\n")
       push.inline = <<-SCRIPT_START + app_lines
 # List of unset variables from Vagrant::Util::Env.with_clean_env
 unset -v _ORIGINAL_GEM_PATH GEM_PATH GEM_HOME GEM_ROOT BUNDLE_BIN_PATH BUNDLE_GEMFILE RUBYLIB RUBYOPT RUBY_ENGINE RUBY_ROOT RUBY_VERSION
