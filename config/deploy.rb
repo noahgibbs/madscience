@@ -1,7 +1,15 @@
 # config valid only for Capistrano 3.1
 lock '3.2.1'
 
-set :mysql_server_root_password, $cap_json["mysql"]["server_root_password"]
+has_mysql = true if $cap_json["run_list"].any? { |s| s["mysql"] }
+has_postgresql = true if $cap_json["run_list"].any? { |s| s["postgresql"] }
+
+raise "Can't use both MySQL and Postgres!" if has_mysql && has_postgresql
+raise "Must use one of MySQL or Postgres!" unless has_mysql || has_postgresql
+
+set :db_driver, has_mysql ? "mysql" : "postgresql"
+
+set :db_root_password, $cap_json[fetch(:db_driver)]["server_root_password"]
 set :default_env, $app_data["env_vars"] || {}
 
 set :application, ENV['INSTALL_APP']
@@ -75,12 +83,12 @@ namespace :deploy do
 
       db_config = <<-EOF
         base: &base
-          adapter: mysql2
+          adapter: #{fetch(:db_driver)}
           encoding: utf8
           reconnect: false
           pool: 5
           username: root
-          password: #{fetch(:mysql_server_root_password)}
+          password: #{fetch(:db_root_password)}
 
         production:
           database: #{fetch(:app_db_name)}
