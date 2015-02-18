@@ -181,11 +181,14 @@ end
       action :create
     end
   elsif has_postgresql
+    # I really hope there's some more clever way to do this. For now, this works.
+    root_password = node['postgresql']['server_root_password']
+    execute "sudo -u postgres psql -U postgres -d postgres -c \"alter user postgres with password '#{root_password}';\""
     postgresql_database db_name do
       connection(
         :host     => 'localhost',
-        :username => 'root',
-        :password => node['postgresql']['server_root_password']
+        :username => 'postgres',
+        :password => root_password
       )
       action :create
     end
