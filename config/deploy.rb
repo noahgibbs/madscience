@@ -84,11 +84,13 @@ namespace :deploy do
       db_config = <<-EOF
         base: &base
           adapter: #{fetch(:db_driver)}
-          encoding: utf8
-          reconnect: false
+          encoding: #{has_mysql ? "utf8" : "unicode"}
+          #{has_mysql ? "reconnect: false" : ""}
           pool: 5
-          username: root
+          host: localhost
+          username: #{has_mysql ? "root" : "postgres"}
           password: #{fetch(:db_root_password)}
+          timeout: 5000
 
         production:
           database: #{fetch(:app_db_name)}
