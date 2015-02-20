@@ -1,4 +1,4 @@
-Deploy Repo for Ruby Mad Science
+# Deploy Repo for Ruby Mad Science
 
 This code is currently under a proprietary license, please do not
 redistribute.  Except, obviously, for those off-the-shelf open-source
@@ -6,20 +6,26 @@ components that are downloaded for use, such as existing Chef cookbooks. They
 should not be checked into the Git repository, and exist under their normal
 licenses.
 
-## Various useful things to do here:
+## To Test and Create a Server
 
-vagrant up --provision / vagrant destroy / vagrant ssh
+    # Edit the file
+    vi nodes/all_nodes.json.erb
+    # Create the server locally
+    vagrant up --provision --provider=virtualbox
+    # Push apps to the server
+    vagrant push development
 
-vagrant provision
+    # ONLY when you're ready to destroy your VM
+    vagrant destroy --force
 
-librarian-chef install
+After testing that, do it for real:
 
-vagrant plugin install vagrant-omnibus --plugin-version 1.4.1
+    # Add your credentials to the Digital Ocean file
+    vi ~/.deploy_credentials/digital_ocean.json
+    vagrant up --provision --provider=digital_ocean
+    vagrant push digital_ocean
 
-TODO: remove StrictHostKeyChecking toggle after we install an SSH key automatically
-ssh www@localhost -p2222 -o "StrictHostKeyChecking no"
+    # ONLY when ready to destroy your (real, on Digital Ocean) VM
+    vagrant destroy --force
 
-## Not so good:
-
-knife cookbook create my_cookbook_name - puts it under the "cookbooks" subdir,
-doesn't seem to have a way not to.
+Providers for AWS and Linode coming soon.
