@@ -122,8 +122,10 @@ unset -v _ORIGINAL_GEM_PATH GEM_PATH GEM_HOME GEM_ROOT BUNDLE_BIN_PATH BUNDLE_GE
   config.vm.provider :aws do |provider, override|
     override.vm.box = 'dummy'
     override.vm.box_url = 'https://github.com/mitchellh/vagrant-aws/raw/master/dummy.box'
+    override.ssh.username = "ubuntu"
+    override.ssh.private_key_path = File.join creds_dir, "id_rsa_provisioning_4096"
 
-    provider.ami = 'ami-37eab407'
+    provider.ami = 'ami-37eab407' # Default AMI
     raise "Can't find aws.json in #{creds_dir}! Set one up first!" unless File.exist? File.join(creds_dir, "aws.json")
     aws_options = JSON.parse File.read File.join(creds_dir, "aws.json")
     aws_options.each do |key, value|
