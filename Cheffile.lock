@@ -48,7 +48,9 @@ SITE
       yum (>= 3.0.0)
 
 DEPENDENCIES
-  database (>= 0)
+  apt (= 2.4.0)
+  apt (>= 0)
+  database (= 2.3.0)
   mysql (= 5.3.6)
   nginx (= 2.7.4)
   runit (= 1.5.10)
