@@ -83,7 +83,7 @@ namespace :deploy do
 
       db_config = <<-EOF
         base: &base
-          adapter: #{fetch(:db_driver)}
+          adapter: #{fetch(:db_driver) == "mysql" ? "mysql2" : "postgresql" }
           encoding: #{has_mysql ? "utf8" : "unicode"}
           #{has_mysql ? "reconnect: false" : ""}
           pool: 5
