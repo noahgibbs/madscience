@@ -21,7 +21,7 @@ This is the open, MIT-licensed source code behind the (commercial) product
 
 ## To Test and Create a Server
 
-    # Edit the file
+    # Edit the file, change from rails-devise-pundit to your app
     vi nodes/all_nodes.json.erb
     # Create the server locally
     vagrant up --provision --provider=virtualbox
