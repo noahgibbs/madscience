@@ -11,8 +11,8 @@ necessary plugins and software.
 
     > gem install madscience
     > rvmsudo madscience setup  # or sudo madscience setup if no rvm
-    > git clone https://github.com/noahgibbs/madscience_deploy_repo
-    > cd madscience_deploy_repo
+    > git clone https://github.com/noahgibbs/madscience
+    > cd madscience
     > vagrant up --provision    # create your local server
     > vagrant push development  # push the app(s) to it
 
