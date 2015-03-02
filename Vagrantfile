@@ -102,6 +102,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     chef_json['ssh_public_deploy_key'],
     chef_json['ssh_public_provisioning_key'] ].join("\n")
 
+  # We want to define a "vagrant push" for just apps in addition to
+  # running Capistrano when provisioning. That allows the app install
+  # to happen alone, which is much faster than a full Chef run.
   # Can't run capistrano under Bundler -- it's not in Vagrant's set of gems.
   # Can't use mfenner's capistrano-push plugin for Vagrant, it only pushes one app.
   # So instead, we make a bash script that unsets Ruby-, Gem- and Bundler-related
@@ -181,4 +184,5 @@ unset -v _ORIGINAL_GEM_PATH GEM_PATH GEM_HOME GEM_ROOT BUNDLE_BIN_PATH BUNDLE_GE
     chef.json = chef_json
     chef.run_list = run_list
   end
+
 end
