@@ -102,6 +102,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     chef_json['ssh_public_deploy_key'],
     chef_json['ssh_public_provisioning_key'] ].join("\n")
 
+  # We want to define a "vagrant push" for just apps in addition to
+  # running Capistrano when provisioning. That allows the app install
+  # to happen alone, which is much faster than a full Chef run.
   # Can't run capistrano under Bundler -- it's not in Vagrant's set of gems.
   # Can't use mfenner's capistrano-push plugin for Vagrant, it only pushes one app.
   # So instead, we make a bash script that unsets Ruby-, Gem- and Bundler-related
@@ -111,7 +114,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       rails_apps = chef_json["ruby_apps"].keys
       # Combination of clean env, bundle exec and subshell taken from mfenner's vagrant-capistrano-push plugin.
       # Plus use a login subshell to make sure rvm is all set up.
-      app_lines = rails_apps.map { |app| "echo Deploying #{app}...\nbash -l -c \"INSTALL_APP=#{app} bundle exec cap #{host_provider} deploy\"" }.join("\n")
+      app_lines = rails_apps.map { |app| "echo Deploying #{app}...\nbash -l -c \"INSTALL_APP=#{app} bundle exec cap production deploy\"" }.join("\n")
       push.inline = <<-SCRIPT_START + app_lines
 # List of unset variables from Vagrant::Util::Env.with_clean_env
 unset -v _ORIGINAL_GEM_PATH GEM_PATH GEM_HOME GEM_ROOT BUNDLE_BIN_PATH BUNDLE_GEMFILE RUBYLIB RUBYOPT RUBY_ENGINE RUBY_ROOT RUBY_VERSION
@@ -180,5 +183,16 @@ unset -v _ORIGINAL_GEM_PATH GEM_PATH GEM_HOME GEM_ROOT BUNDLE_BIN_PATH BUNDLE_GE
     chef_json["madscience_run_list"] = run_list  # Pass in a copy not named run_list
     chef.json = chef_json
     chef.run_list = run_list
+  end
+
+  config.vm.provision :host_shell do |shell|
+    rails_apps = chef_json["ruby_apps"].keys
+    # Combination of clean env, bundle exec and subshell taken from mfenner's vagrant-capistrano-push plugin.
+    # Plus use a login subshell to make sure rvm is all set up.
+    app_lines = rails_apps.map { |app| "echo Deploying #{app}...\nbash -l -c \"INSTALL_APP=#{app} bundle exec cap production deploy\"" }.join("\n")
+    shell.inline = <<-SCRIPT_START + app_lines
+#List of unset variables from Vagrant::Util::Env.with_clean_env
+unset -v _ORIGINAL_GEM_PATH GEM_PATH GEM_HOME GEM_ROOT BUNDLE_BIN_PATH BUNDLE_GEMFILE RUBYLIB RUBYOPT RUBY_ENGINE RUBY_ROOT RUBY_VERSION
+    SCRIPT_START
   end
 end
