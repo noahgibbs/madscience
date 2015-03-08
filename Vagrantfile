@@ -120,13 +120,13 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     config.vm.define vagrant_hostname do |vagrant|
       vagrant.vm.hostname = vagrant_hostname
 
-      # Create a forwarded port mapping which allows access to a specific port
-      # within the machine from a port on the host machine. In the example below,
-      # accessing "localhost:8080" will access port 80 on the guest machine.
-      # This doesn't usually work for real providers like AWS, Digital Ocean
+      # Note: port-forwarding doesn't usually work for real providers like AWS, Digital Ocean
       # and Linode.
-      config.vm.network "forwarded_port", guest: 80, host: 4321
-      config.vm.network "forwarded_port", guest: 8800, host: 4322
+      #config.vm.network "forwarded_port", guest: 80, host: 4321
+      (chef_json['forwarded_ports'] || {}).each do |guest, host|
+        next if guest.is_a?(String) && guest[0] == "#"  # Allow JSON comments
+        config.vm.network "forwarded_ports", guest: guest, host: host
+      end
 
       # Enable provisioning with chef solo, specifying a cookbooks path, roles
       # path, and data_bags path (all relative to this Vagrantfile), and adding
