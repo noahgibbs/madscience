@@ -86,8 +86,8 @@ include_recipe "rvm::user_install"
 include_recipe "runit"
 
 # Using MySQL or Postgres?
-has_mysql = node["madscience_run_list"].any? { |s| s["mysql"] }
-has_postgresql = node["madscience_run_list"].any? { |s| s["postgresql"] }
+has_mysql = node["run_list"].any? { |s| s["mysql"] }
+has_postgresql = node["run_list"].any? { |s| s["postgresql"] }
 
 raise "Can't use both Postgres and MySQL on one node!" if has_mysql && has_postgresql
 

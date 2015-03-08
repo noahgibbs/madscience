@@ -4,6 +4,8 @@
 # Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
 VAGRANTFILE_API_VERSION = "2"
 
+require_relative "config/madscience_config.rb"
+
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # All Vagrant configuration is done here. The most common configuration
   # options are documented and commented below. For a complete reference,
@@ -44,12 +46,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   home_dir = ENV['HOME'] || ENV['userdir'] || "/home/#{ENV['USER']}"
   ssh_dir = File.join(home_dir, ".ssh")
 
-  # Configure a preferred private key, not the well-known insecure Vagrant key
-  # See: https://docs.vagrantup.com/v2/vagrantfile/ssh_settings.html
-  #      http://stackoverflow.com/questions/14715678/vagrant-insecure-by-default/14719184
-
-  # TODO: Check keys for non-Vagrant users in cookbook, any use of non-RDIAH keys?
-
   # Share an additional folder to the guest VM. The first argument is
   # the path on the host to the actual folder. The second argument is
   # the path on the guest to mount the folder. And the optional third
@@ -65,44 +61,20 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     #vb.gui = true
 
     # Use VBoxManage to customize the VM. For example to change memory:
+    # In this case, we want more than 1GB because it's often impossible to
+    # compile Ruby 2.0.0+ with 1GB of memory.
     vb.customize ["modifyvm", :id, "--memory", "2048"]
   end
 
-  # View the documentation for the provider you're using for more
-  # information on available options.
-
   # Use this specific, not-default-for-Vagrant Chef version
+  # via the vagrant-omnibus plugin
   config.omnibus.chef_version = "12.0.3"
 
-  # The file nodes/vagrant.json contains the Chef attributes,
-  # plus a run_list.
+  # Files under nodes/*.json.erb are nodes (VMs). For a multi-machine
+  # setup, using more than one such file.
+  chef_json_by_vm = get_chef_json_by_vm
 
-  json_erb_path = File.join(File.dirname(__FILE__), "nodes", "all_nodes.json.erb")
-  eruby = Erubis::Eruby.new File.read(json_erb_path)
-
-  # TODO: add Vagrant-specific node file and merge it over top of all_nodes.json.erb
-  chef_json = JSON.parse eruby.result({})
-  raise "Can't read JSON file for vagrant Chef node!" unless chef_json
-
-  # TODO: test on Windows
-  home_dir = ENV['HOME'] || ENV['userprofile']
-  creds_dir = File.join(home_dir, '.deploy_credentials')
-
-  # Read local credentials and pass them to Chef
-  # We need to pass in the private deploy key so that Capistrano can clone your Git repo from the host
-  chef_json['ssh_public_provisioning_key'] = File.read File.join(creds_dir, 'id_rsa_provisioning_4096.pub')
-  #chef_json['ssh_private_provisioning_key'] = File.read File.join(creds_dir, 'id_rsa_provisioning_4096')
-  chef_json['ssh_public_deploy_key'] = File.read File.join(creds_dir, 'id_rsa_deploy_4096.pub')
-  chef_json['ssh_private_deploy_key'] = File.read File.join(creds_dir, 'id_rsa_deploy_4096')
-
-  # For authorized keys, let in anybody you specified in ~/.deploy_credentials/authorized_keys, plus the
-  # provisioning and deploy keys.
-  chef_json['authorized_keys'] = [
-    File.read(File.join(creds_dir, 'authorized_keys')),
-    chef_json['ssh_public_deploy_key'],
-    chef_json['ssh_public_provisioning_key'] ].join("\n")
-
-  # We want to define a "vagrant push" for just apps in addition to
+  # We want to define a "vagrant push" to install only apps in addition to
   # running Capistrano when provisioning. That allows the app install
   # to happen alone, which is much faster than a full Chef run.
   # Can't run capistrano under Bundler -- it's not in Vagrant's set of gems.
@@ -133,11 +105,6 @@ unset -v _ORIGINAL_GEM_PATH GEM_PATH GEM_HOME GEM_ROOT BUNDLE_BIN_PATH BUNDLE_GE
     aws_options = JSON.parse File.read File.join(creds_dir, "aws.json")
     aws_options.each do |key, value|
       next if key[0] == "#"  # Skip JSON 'comments'
-
-      # How do we detect that this is the provider actually being used right now?
-      #if key == "access_key_id" && value == ""
-      #  raise "Hey! You have to edit aws.json in #{creds_dir} and set up your AWS credentials first!"
-      #end
 
       # Getting an error on the following line? You may have set a property in the JSON
       # that doesn't exist.  See https://github.com/mitchellh/vagrant-aws,
@@ -178,11 +145,8 @@ unset -v _ORIGINAL_GEM_PATH GEM_PATH GEM_HOME GEM_ROOT BUNDLE_BIN_PATH BUNDLE_GE
     # WORKAROUND: This is to prevent a nasty SSL and HTTP warning
     chef.custom_config_path = "Vagrantfile.chef"
 
-    # You may also specify custom JSON attributes:
-    run_list = chef_json.delete 'run_list'
-    chef_json["madscience_run_list"] = run_list  # Pass in a copy not named run_list
     chef.json = chef_json
-    chef.run_list = run_list
+    chef.run_list = chef_json['run_list']
   end
 
   config.vm.provision :host_shell do |shell|
