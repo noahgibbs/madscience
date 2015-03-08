@@ -3,7 +3,7 @@
 # Recipe:: default
 #
 
-# First, apt-get update. We do that with the run_list in
+# Before several of these operations, apt-get update. We do that with the run_list in
 # the Node JSON file.
 
 # Your application(s) shouldn't run as root.

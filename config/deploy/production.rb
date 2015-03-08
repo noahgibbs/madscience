@@ -1,4 +1,4 @@
-# First, get Digital Ocean settings
+# First, get host settings
 
 # Parse output of ssh-config. Example:
 # Host default
@@ -13,14 +13,14 @@
 #   LogLevel FATAL
 #   ForwardAgent yes
 
-ssh_conf = `vagrant ssh-config`
+ssh_conf = `vagrant ssh-config #{$install_host}`
 ssh_opts = {}
 ssh_conf.split("\n").map(&:strip).each { |line| key, val = line.split(/\s+/, 2); ssh_opts[key] = val }
 
 home_dir = ENV['HOME'] || ENV['userdir'] || "/home/#{ENV['USER']}"
 creds_dir = File.join home_dir, ".deploy_credentials"
 
-app_user = 'www'  # FIXME
+app_user = $app_data['user'] || 'www'
 
 server ssh_opts['HostName'],
   user: app_user,
