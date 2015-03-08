@@ -20,7 +20,7 @@ ssh_conf.split("\n").map(&:strip).each { |line| key, val = line.split(/\s+/, 2);
 home_dir = ENV['HOME'] || ENV['userdir'] || "/home/#{ENV['USER']}"
 creds_dir = File.join home_dir, ".deploy_credentials"
 
-app_user = 'www'  # FIXME
+app_user = $app_data['user'] || 'www'
 
 server ssh_opts['HostName'],
   user: app_user,
