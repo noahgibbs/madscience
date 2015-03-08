@@ -26,6 +26,8 @@
 
   # Generate secret keys for any app without them
   secret_keys["rails-devise-pundit"] ||= (0..127).map { (('a'..'f').to_a + ('0'..'9').to_a).sample }.join
+  secret_keys["mysql_root_password"] ||= (0..32).map { (('a'..'f').to_a + ('0'..'9').to_a).sample }.join
+  secret_keys["mysql_debian_password"] ||= (0..32).map { (('a'..'f').to_a + ('0'..'9').to_a).sample }.join
 
   if orig_secret_keys != secret_keys
     File.open(filename, "w") { |f| f.write JSON.dump(secret_keys) }
@@ -87,8 +89,8 @@
   },
   "mysql": {
     "#": "See http://community.opscode.com/cookbooks/mysql",
-    "server_root_password": "iloverandompasswords",
-    "server_debian_password": "ilove92432345random444passwords",
+    "server_root_password": <%= secret_keys['mysql_root_password'].inspect %>,
+    "server_debian_password": <%= secret_keys['mysql_debian_password'].inspect %>,
     "remove_anonymous_users": true,
     "allow_remote_root": false
   },
