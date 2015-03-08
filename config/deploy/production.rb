@@ -13,7 +13,7 @@
 #   LogLevel FATAL
 #   ForwardAgent yes
 
-ssh_conf = `vagrant ssh-config #{INSTALL_HOST}`
+ssh_conf = `vagrant ssh-config #{$install_host}`
 ssh_opts = {}
 ssh_conf.split("\n").map(&:strip).each { |line| key, val = line.split(/\s+/, 2); ssh_opts[key] = val }
 

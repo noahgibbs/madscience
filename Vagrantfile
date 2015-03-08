@@ -141,8 +141,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         # WORKAROUND: This is to prevent a nasty SSL and HTTP warning
         chef.custom_config_path = "Vagrantfile.chef"
 
+        # Turns out 'run_list' is basically a special keyword in Chef. Have to
+        # use a different name to pass it in as node data.
+        run_list = chef_json.delete 'run_list'
+        chef_json['madscience_run_list'] = run_list
         chef.json = chef_json
-        chef.run_list = chef_json['run_list']
+        chef.run_list = run_list
       end
 
       config.vm.provision :host_shell do |shell|
@@ -154,23 +158,37 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     unset -v #{UNSET_VARS.join " "}
         SCRIPT_START
       end
+    end
+  end
 
-      # We want to define a "vagrant push" to install only apps in addition to
-      # running Capistrano when provisioning. That allows the app install
-      # to happen alone, which is much faster than a full Chef run.
-      # Can't run capistrano under Bundler -- it's not in Vagrant's set of gems.
-      # Can't use mfenner's capistrano-push plugin for Vagrant, it only pushes one app.
-      # So instead, we make a bash script that unsets Ruby-, Gem- and Bundler-related
-      # environment variables, then pushes everything.
-      config.push.define "local-exec" do |push|
-        rails_apps = chef_json["ruby_apps"].keys
-        # Combination of clean env, bundle exec and subshell taken from mfenner's vagrant-capistrano-push plugin.
-        # Plus use a login subshell to make sure rvm is all set up.
-        app_lines = rails_apps.map { |app| "echo Deploying #{app} on #{vagrant_hostname}...\nbash -l -c \"INSTALL_APP=#{app} INSTALL_HOST=#{vagrant_hostname} bundle exec cap production deploy\"" }.join("\n")
-        push.inline = <<-SCRIPT_START + app_lines
-          unset -v #{UNSET_VARS.join " "}
-        SCRIPT_START
+  # We want to define a "vagrant push" to install only apps in addition to
+  # running Capistrano when provisioning. That allows the app install
+  # to happen alone, which is much faster than a full Chef run.
+  # Can't run capistrano under Bundler -- it's not in Vagrant's set of gems.
+  # Can't use mfenner's capistrano-push plugin for Vagrant, it only pushes one app.
+  # So instead, we make a bash script that unsets Ruby-, Gem- and Bundler-related
+  # environment variables, then pushes everything.
+  config.push.define "local-exec" do |push|
+    # Combination of clean env, bundle exec and subshell taken from mfenner's vagrant-capistrano-push plugin.
+    # Plus use a login subshell to make sure rvm is all set up.
+    script_start = <<-SCRIPT_START
+      unset -v #{UNSET_VARS.join " "}
+    SCRIPT_START
+
+    app_lines = [ script_start ]
+
+    vagrant_vms = chef_json_by_vm.keys
+    vagrant_vms.each do |vm_name|
+      chef_json = chef_json_by_vm[vm_name]
+      rails_apps = chef_json["ruby_apps"].keys
+
+      app_lines += rails_apps.flat_map do |app|
+        [ "echo Deploying #{app} on #{vm_name}...",
+          "bash -l -c \"INSTALL_APP=#{app} INSTALL_HOST=#{vm_name} bundle exec cap production deploy\""
+        ]
       end
     end
+
+    push.inline = app_lines.join "\n"
   end
 end

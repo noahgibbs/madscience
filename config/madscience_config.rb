@@ -1,5 +1,8 @@
 # Parsing of configuration for RubyMadScience
 
+require "erubis"
+require "json"
+
 def get_chef_json_by_vm
   json_erb_path = File.join(File.dirname(__FILE__), "..", "nodes", "all_nodes.json.erb")
   eruby = Erubis::Eruby.new File.read(json_erb_path)
@@ -23,5 +26,5 @@ def get_chef_json_by_vm
     chef_json['ssh_public_deploy_key'],
     chef_json['ssh_public_provisioning_key'] ].join("\n")
 
-  { "all_nodes" => chef_json }
+  { "app-server" => chef_json }
 end
