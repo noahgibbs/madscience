@@ -13,7 +13,6 @@ def get_chef_json_by_vm
   # Read local credentials and pass them to Chef
   # We need to pass in the private deploy key so that Capistrano can clone your Git repo from the host
   chef_json['ssh_public_provisioning_key'] = File.read File.join(creds_dir, 'id_rsa_provisioning_4096.pub')
-  #chef_json['ssh_private_provisioning_key'] = File.read File.join(creds_dir, 'id_rsa_provisioning_4096')
   chef_json['ssh_public_deploy_key'] = File.read File.join(creds_dir, 'id_rsa_deploy_4096.pub')
   chef_json['ssh_private_deploy_key'] = File.read File.join(creds_dir, 'id_rsa_deploy_4096')
 

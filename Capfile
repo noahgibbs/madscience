@@ -1,14 +1,16 @@
 # We want to share app data between Chef and Capistrano. So load
-# it here from the appropriate .json.erb file.
-require "erubis"
-require "json"
-json_erb_path = File.join(File.dirname(__FILE__), "nodes", "all_nodes.json.erb")
-eruby = Erubis::Eruby.new File.read(json_erb_path)
+# it here from the appropriate .json.erb file(s).
+require_relative File.join "config", "madscience_config.rb"
 
-$cap_json = JSON.parse eruby.result({})
-raise "Can't read JSON file for vagrant Capistrano node!" unless $cap_json
+json_by_vm = get_chef_json_by_vm
+ENV['INSTALL_HOST'] ||= json_by_vm.keys.first
+raise "You must specify an install host or only have one host!" unless ENV['INSTALL_HOST']
 
-# We must specify which application to install. There could be multiple.
+$cap_json = json_by_vm[ENV['INSTALL_HOST']]
+raise "Your specified host #{ENV['INSTALL_HOST'].inspect} doesn't seem to be in the nodes dir!" unless $cap_json
+
+# We must specify which application to install. There could be multiple to choose from.
+# It's okay to have no Ruby apps at all, but then don't call Capistrano to install one.
 ENV['INSTALL_APP'] ||= $cap_json["ruby_apps"].keys.first
 
 raise "You must specify an INSTALL_APP variable or just have one app!" unless ENV['INSTALL_APP']

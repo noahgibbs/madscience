@@ -6,6 +6,12 @@ VAGRANTFILE_API_VERSION = "2"
 
 require_relative "config/madscience_config.rb"
 
+# Here's a list of environment variables to unset when getting a clean
+# environment from inside Vagrant. Based on Vagrant::Util::Env.with_clean_env
+UNSET_VARS = %w(_ORIGINAL_GEM_PATH GEM_PATH GEM_HOME GEM_ROOT
+                BUNDLE_BIN_PATH BUNDLE_GEMFILE RUBYLIB RUBYOPT
+                RUBY_ENGINE RUBY_ROOT RUBY_VERSION)
+
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # All Vagrant configuration is done here. The most common configuration
   # options are documented and commented below. For a complete reference,
@@ -17,14 +23,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # The url from where the 'config.vm.box' box will be fetched if it
   # doesn't already exist on the user's system.
   # config.vm.box_url = "http://domain.com/path/to/above.box"
-
-  # Create a forwarded port mapping which allows access to a specific port
-  # within the machine from a port on the host machine. In the example below,
-  # accessing "localhost:8080" will access port 80 on the guest machine.
-  # This doesn't usually work for real providers like AWS, Digital Ocean
-  # and Linode.
-  config.vm.network "forwarded_port", guest: 80, host: 4321
-  config.vm.network "forwarded_port", guest: 8800, host: 4322
 
   # Create a private network, which allows host-only access to the machine
   # using a specific IP.
@@ -73,32 +71,16 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # Files under nodes/*.json.erb are nodes (VMs). For a multi-machine
   # setup, using more than one such file.
   chef_json_by_vm = get_chef_json_by_vm
-
-  # We want to define a "vagrant push" to install only apps in addition to
-  # running Capistrano when provisioning. That allows the app install
-  # to happen alone, which is much faster than a full Chef run.
-  # Can't run capistrano under Bundler -- it's not in Vagrant's set of gems.
-  # Can't use mfenner's capistrano-push plugin for Vagrant, it only pushes one app.
-  # So instead, we make a bash script that unsets Ruby-, Gem- and Bundler-related
-  # environment variables, then pushes everything.
-  ["digital_ocean", "aws", "linode", "development"].each do |host_provider|
-    config.push.define(host_provider, strategy: "local-exec") do |push|
-      rails_apps = chef_json["ruby_apps"].keys
-      # Combination of clean env, bundle exec and subshell taken from mfenner's vagrant-capistrano-push plugin.
-      # Plus use a login subshell to make sure rvm is all set up.
-      app_lines = rails_apps.map { |app| "echo Deploying #{app}...\nbash -l -c \"INSTALL_APP=#{app} bundle exec cap production deploy\"" }.join("\n")
-      push.inline = <<-SCRIPT_START + app_lines
-# List of unset variables from Vagrant::Util::Env.with_clean_env
-unset -v _ORIGINAL_GEM_PATH GEM_PATH GEM_HOME GEM_ROOT BUNDLE_BIN_PATH BUNDLE_GEMFILE RUBYLIB RUBYOPT RUBY_ENGINE RUBY_ROOT RUBY_VERSION
-      SCRIPT_START
-    end
-  end
+  home_dir = ENV['HOME'] || ENV['userprofile']
+  creds_dir = File.join(home_dir, '.deploy_credentials')
+  private_prov_key_path = File.join(creds_dir, 'id_rsa_provisioning_4096')
 
   config.vm.provider :aws do |provider, override|
     override.vm.box = 'dummy'
     override.vm.box_url = 'https://github.com/mitchellh/vagrant-aws/raw/master/dummy.box'
     override.ssh.username = "ubuntu"
-    override.ssh.private_key_path = File.join creds_dir, "id_rsa_provisioning_4096"
+    # TODO: FIX THIS VM!
+    override.ssh.private_key_path = private_prov_key_path
 
     provider.ami = 'ami-37eab407' # Default AMI
     raise "Can't find aws.json in #{creds_dir}! Set one up first!" unless File.exist? File.join(creds_dir, "aws.json")
@@ -114,7 +96,7 @@ unset -v _ORIGINAL_GEM_PATH GEM_PATH GEM_HOME GEM_ROOT BUNDLE_BIN_PATH BUNDLE_GE
   end
 
   config.vm.provider :digital_ocean do |provider, override|
-    override.ssh.private_key_path = File.join creds_dir, "id_rsa_provisioning_4096"
+    override.ssh.private_key_path = private_prov_key_path
     override.vm.box = 'digital_ocean'
     override.vm.box_url = "https://github.com/smdahlen/vagrant-digitalocean/raw/master"
 
@@ -132,31 +114,63 @@ unset -v _ORIGINAL_GEM_PATH GEM_PATH GEM_HOME GEM_ROOT BUNDLE_BIN_PATH BUNDLE_GE
     end
   end if File.exist?(File.join(creds_dir, 'digital_ocean.json'))
 
-  # Enable provisioning with chef solo, specifying a cookbooks path, roles
-  # path, and data_bags path (all relative to this Vagrantfile), and adding
-  # some recipes and/or roles.
-  #
-  config.vm.provision "chef_solo" do |chef|
-    chef.cookbooks_path = ["site-cookbooks", "cookbooks"]
-    chef.roles_path = "roles"
-    chef.data_bags_path = "data_bags"
-    chef.provisioning_path = "/tmp/vagrant-chef"
+  chef_json_by_vm.keys.each do |vagrant_hostname|
+    chef_json = chef_json_by_vm[vagrant_hostname]
 
-    # WORKAROUND: This is to prevent a nasty SSL and HTTP warning
-    chef.custom_config_path = "Vagrantfile.chef"
+    config.vm.define vagrant_hostname do |vagrant|
+      vagrant.vm.hostname = vagrant_hostname
 
-    chef.json = chef_json
-    chef.run_list = chef_json['run_list']
-  end
+      # Create a forwarded port mapping which allows access to a specific port
+      # within the machine from a port on the host machine. In the example below,
+      # accessing "localhost:8080" will access port 80 on the guest machine.
+      # This doesn't usually work for real providers like AWS, Digital Ocean
+      # and Linode.
+      config.vm.network "forwarded_port", guest: 80, host: 4321
+      config.vm.network "forwarded_port", guest: 8800, host: 4322
 
-  config.vm.provision :host_shell do |shell|
-    rails_apps = chef_json["ruby_apps"].keys
-    # Combination of clean env, bundle exec and subshell taken from mfenner's vagrant-capistrano-push plugin.
-    # Plus use a login subshell to make sure rvm is all set up.
-    app_lines = rails_apps.map { |app| "echo Deploying #{app}...\nbash -l -c \"INSTALL_APP=#{app} bundle exec cap production deploy\"" }.join("\n")
-    shell.inline = <<-SCRIPT_START + app_lines
-#List of unset variables from Vagrant::Util::Env.with_clean_env
-unset -v _ORIGINAL_GEM_PATH GEM_PATH GEM_HOME GEM_ROOT BUNDLE_BIN_PATH BUNDLE_GEMFILE RUBYLIB RUBYOPT RUBY_ENGINE RUBY_ROOT RUBY_VERSION
-    SCRIPT_START
+      # Enable provisioning with chef solo, specifying a cookbooks path, roles
+      # path, and data_bags path (all relative to this Vagrantfile), and adding
+      # some recipes and/or roles.
+      #
+      config.vm.provision "chef_solo" do |chef|
+        chef.cookbooks_path = ["site-cookbooks", "cookbooks"]
+        chef.roles_path = "roles"
+        chef.data_bags_path = "data_bags"
+        chef.provisioning_path = "/tmp/vagrant-chef"
+
+        # WORKAROUND: This is to prevent a nasty SSL and HTTP warning
+        chef.custom_config_path = "Vagrantfile.chef"
+
+        chef.json = chef_json
+        chef.run_list = chef_json['run_list']
+      end
+
+      config.vm.provision :host_shell do |shell|
+        rails_apps = chef_json["ruby_apps"].keys
+        # Combination of clean env, bundle exec and subshell taken from mfenner's vagrant-capistrano-push plugin.
+        # Plus use a login subshell to make sure rvm is all set up.
+        app_lines = rails_apps.map { |app| "echo Deploying #{app} on #{vagrant_hostname}...\nbash -l -c \"INSTALL_APP=#{app} INSTALL_HOST=#{vagrant_hostname} bundle exec cap production deploy\"" }.join("\n")
+        shell.inline = <<-SCRIPT_START + app_lines
+    unset -v #{UNSET_VARS.join " "}
+        SCRIPT_START
+      end
+
+      # We want to define a "vagrant push" to install only apps in addition to
+      # running Capistrano when provisioning. That allows the app install
+      # to happen alone, which is much faster than a full Chef run.
+      # Can't run capistrano under Bundler -- it's not in Vagrant's set of gems.
+      # Can't use mfenner's capistrano-push plugin for Vagrant, it only pushes one app.
+      # So instead, we make a bash script that unsets Ruby-, Gem- and Bundler-related
+      # environment variables, then pushes everything.
+      config.push.define "local-exec" do |push|
+        rails_apps = chef_json["ruby_apps"].keys
+        # Combination of clean env, bundle exec and subshell taken from mfenner's vagrant-capistrano-push plugin.
+        # Plus use a login subshell to make sure rvm is all set up.
+        app_lines = rails_apps.map { |app| "echo Deploying #{app} on #{vagrant_hostname}...\nbash -l -c \"INSTALL_APP=#{app} INSTALL_HOST=#{vagrant_hostname} bundle exec cap production deploy\"" }.join("\n")
+        push.inline = <<-SCRIPT_START + app_lines
+          unset -v #{UNSET_VARS.join " "}
+        SCRIPT_START
+      end
+    end
   end
 end
