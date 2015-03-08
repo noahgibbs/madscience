@@ -3,7 +3,7 @@
 require "erubis"
 require "json"
 
-def get_chef_json_by_vm
+def get_json_by_vm
   json_files = Dir[File.join(File.dirname(__FILE__), "..", "nodes", "*.json.erb")]
   json_by_vm = {}
 

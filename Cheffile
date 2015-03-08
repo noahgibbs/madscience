@@ -2,13 +2,13 @@
 #^syntax detection
 
 # This file is a bit of a hack, an attempt to make the one-file mirage of
-# all_nodes.json.erb work properly while not limiting you to purely
+# app-server.json.erb work properly while not limiting you to purely
 # off-the-shelf cookbooks.
 #
 # Cookbooks required by the deploy repo itself are specified here, usually
 # with specific versions. That's to make sure that, say, the NGinX and MySQL
 # cookbooks are well-tested with the code to make them work. But if you mess
-# with all_nodes.json.erb to add more cookbooks, by default that should work
+# with app-server.json.erb to add more cookbooks, by default that should work
 # too.
 #
 # However, "works by default" has some limits. If you include cookbooks in the
@@ -22,15 +22,12 @@
 # same thing as Berkshelf and works basically the same way. Yup, it's Bundler
 # for Chef.
 
-# Read in all_nodes.json.erb
-require "json"
-require "erubis"
-nodes_data = File.read File.join("nodes", "all_nodes.json.erb")
-eruby = Erubis::Eruby.new nodes_data
-nodes_json = JSON.parse eruby.result({})
+# Read in node files
+require_relative File.join("config", "madscience_config.rb")
+nodes_json = get_json_by_vm
 
 # Now, get the cookbooks from the run list
-run_list = nodes_json["run_list"]
+run_list = nodes_json.values.flat_map { |node| node["run_list"] }
 run_list_cookbooks = run_list.map { |s| s.split("::", 2)[0] }.uniq
 
 # These two are supplied by the deploy repo itself

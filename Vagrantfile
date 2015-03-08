@@ -70,7 +70,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   # Files under nodes/*.json.erb are nodes (VMs). For a multi-machine
   # setup, using more than one such file.
-  chef_json_by_vm = get_chef_json_by_vm
+  chef_json_by_vm = get_json_by_vm
   home_dir = ENV['HOME'] || ENV['userprofile']
   creds_dir = File.join(home_dir, '.deploy_credentials')
   private_prov_key_path = File.join(creds_dir, 'id_rsa_provisioning_4096')

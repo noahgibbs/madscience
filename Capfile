@@ -2,7 +2,7 @@
 # it here from the appropriate .json.erb file(s).
 require_relative File.join "config", "madscience_config.rb"
 
-json_by_vm = get_chef_json_by_vm
+json_by_vm = get_json_by_vm
 ENV['INSTALL_HOST'] ||= json_by_vm.keys.first
 $install_host = ENV['INSTALL_HOST']
 raise "You must specify an install host or only have one host!" unless $install_host
