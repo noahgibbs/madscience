@@ -125,7 +125,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       #config.vm.network "forwarded_port", guest: 80, host: 4321
       (chef_json['forwarded_ports'] || {}).each do |guest, host|
         next if guest.is_a?(String) && guest[0] == "#"  # Allow JSON comments
-        config.vm.network "forwarded_ports", guest: guest.to_i, host: host.to_i
+        config.vm.network "forwarded_port", guest: guest.to_i, host: host.to_i
       end
 
       # Enable provisioning with chef solo, specifying a cookbooks path, roles
