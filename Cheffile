@@ -23,7 +23,7 @@
 # for Chef.
 
 # Read in node files
-require_relative File.join("config", "madscience_config.rb")
+require File.join(File.dirname(__FILE__), "config", "madscience_config.rb")
 nodes_json = get_json_by_vm
 
 # Now, get the cookbooks from the run list
