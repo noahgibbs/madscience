@@ -180,7 +180,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     vagrant_vms = chef_json_by_vm.keys
     vagrant_vms.each do |vm_name|
       chef_json = chef_json_by_vm[vm_name]
-      rails_apps = chef_json["ruby_apps"].keys
+      rails_apps = (chef_json["ruby_apps"] || []).keys
 
       app_lines += rails_apps.flat_map do |app|
         [ "echo Deploying #{app} on #{vm_name}...",
