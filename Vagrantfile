@@ -145,7 +145,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         # use a different name to pass it in as node data.
         run_list = chef_json.delete 'run_list'
         chef_json['madscience_run_list'] = run_list
-        chef.json = chef_json
+        chef.json = chef_json.dup  # Don't just assign, var changes in loop
         chef.run_list = run_list
       end
 
