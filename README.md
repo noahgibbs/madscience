@@ -10,11 +10,12 @@ correct versions of Vagrant and Virtualbox on your dev machine and all the
 necessary plugins and software.
 
     > gem install madscience
-    > rvmsudo madscience setup  # or sudo madscience setup if no rvm
-    > git clone https://github.com/noahgibbs/madscience
-    > cd madscience
-    > vagrant up --provision    # create your local server
-    > vagrant push development  # push the app(s) to it
+    > rvmsudo madscience construct  # or sudo madscience construct if no rvm
+
+This will install dev tools locally, clone a repo into the "madscience"
+directory under your current, and then deploy a server with a Rails test app
+to your VM. It's often a one-line change to make it deploy *your* Rails or
+Rack app instead.
 
 This is the open, MIT-licensed source code behind the (commercial) product
 "Rails Deploy In An Hour" (http://rails-deploy-in-an-hour.com).
@@ -23,10 +24,8 @@ This is the open, MIT-licensed source code behind the (commercial) product
 
     # Edit the file, change from rails-devise-pundit to your app
     vi nodes/app_server.json.erb
-    # Create the server locally
+    # Create the server locally and push apps to it
     vagrant up --provision --provider=virtualbox
-    # Push apps to the server
-    vagrant push development
 
     # ONLY when you're ready to destroy your VM
     vagrant destroy --force
@@ -36,13 +35,14 @@ After testing that, do it for real:
     # Add your credentials to the Digital Ocean file
     vi ~/.deploy_credentials/digital_ocean.json
     vagrant up --provision --provider=digital_ocean
-    vagrant push digital_ocean
 
     # ONLY when ready to destroy your (real, on Digital Ocean) VM
     vagrant destroy --force
 
-Providers for AWS and Linode coming soon, and they'll work exactly the same
-way. You'll just replace "digital_ocean" with "aws" or "linode" above.
+AWS already works, and a provider for Linode is coming soon. They work exactly
+the same way. You'll just replace "digital_ocean" with "aws" or "linode"
+above. You'll also need to edit their JSON files to add credentials, choose
+instance types and otherwise do provider-specific configuration.
 
 ## Why Is This Different?
 
@@ -87,8 +87,8 @@ On-VM tools as of this writing include:
 Ruby, RVM, Bundler
 NGinX
 Runit (process control and restart)
-MySQL
-Optional PostgreSQL, Redis, MemCacheD and other support
+MySQL (or optional PostgreSQL)
+Optional-but-tested Redis, MemCacheD and other support
 
 ## Why Not Docker?
 
