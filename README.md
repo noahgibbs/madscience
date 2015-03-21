@@ -20,6 +20,19 @@ Rack app instead.
 This is the open, MIT-licensed source code behind the (commercial) product
 "Rails Deploy In An Hour" (http://rails-deploy-in-an-hour.com).
 
+## What Do You Need?
+
+* Ruby
+* RubyGems
+
+MadScience is compatible with your version manager of choice, but doesn't
+require one on the host machine. You may need to use a different command line
+for sudo, as you normally would when running Ruby executables with that
+version manager -- for instance, rvm uses "rvmsudo".
+
+It uses RVM on the Guest VM, and doesn't allow other version managers on the
+guest.
+
 ## To Test and Create a Server
 
     # Edit the file, change from rails-devise-pundit to your app
