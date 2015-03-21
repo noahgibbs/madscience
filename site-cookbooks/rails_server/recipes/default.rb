@@ -229,17 +229,19 @@ end
 # Create NGinX configs for static sites
 (node["static_sites"] || []).each do |site_name, site_data|
   site_dir = "/var/www/static/#{site_name}"
+  site_user = site_data["user"] || "root"
+  ruby_version = "2.0.0-p598"  # TODO: get from JSON
 
   directory site_dir do
-    user site_data["user"] || "root"
-    group site_data["user"] || "root"
+    user site_user
+    group site_user
     mode "0755"
   end
 
   git site_dir do
     repository site_data["git"]
     revision site_data["git_revision"] if site_data["git_revision"]
-    user site_data["user"] || "root"
+    user site_user
 
     # Use wrapper to set deploy key
     is_root = !site_data["user"] || site_data["user"] == "root"
@@ -273,6 +275,22 @@ end
   end
 
   nginx_site "#{site_name}-static.conf"
+
+  # Get commands as flat list of string commands
+  commands = site_data["deploy_commands"] || []
+  commands = [commands].flatten
+
+  commands.each do |cmd_code|
+    # Static sites are allowed to run commands when deployed
+    rvm_shell "static site deploy cmd: #{cmd_code}" do
+      user site_user
+      cwd site_dir
+      code "bash -l -c '#{cmd_code}'"
+      ruby_string ruby_version
+      returns [0]
+    end
+  end
+
 end
 
 # Create services, run files and other runit and nginx infrastructure
