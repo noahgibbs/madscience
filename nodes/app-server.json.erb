@@ -74,8 +74,12 @@
   "forwarded_ports": {
     "#": "These are given as guest:host, so 80:4321 maps VM port 80 to your dev machine's port 4321",
     "#": "Also, the keys have to be strings, so put them in quotes.",
+    "#": "By default, we forward the first 4 Unicorn ports (and 80)",
     "80": "4321",
-    "8800": "4322"
+    "8800": "4322",
+    "8900": "4323",
+    "9000": "4324",
+    "9100": "4325"
   },
   "users": {
     "www": {
