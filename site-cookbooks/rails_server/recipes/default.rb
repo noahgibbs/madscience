@@ -238,6 +238,10 @@ end
     mode "0755"
   end
 
+  # Get commands as flat list of string commands
+  commands = site_data["deploy_commands"] || []
+  commands = [commands].flatten
+
   git site_dir do
     repository site_data["git"]
     revision site_data["git_revision"] if site_data["git_revision"]
@@ -249,6 +253,11 @@ end
       ssh_wrapper("/root/ssh_deploy_key_wrapper.sh")
     else
       ssh_wrapper("/home/#{site_data["user"]}/ssh_deploy_key_wrapper.sh")
+    end
+
+    # Run commands only if this Git repo changes
+    commands.each do |command|
+      notifies :run, "rvm_shell[static site deploy cmd: #{command}]"
     end
   end
 
@@ -276,10 +285,6 @@ end
 
   nginx_site "#{site_name}-static.conf"
 
-  # Get commands as flat list of string commands
-  commands = site_data["deploy_commands"] || []
-  commands = [commands].flatten
-
   commands.each do |cmd_code|
     # Static sites are allowed to run commands when deployed
     rvm_shell "static site deploy cmd: #{cmd_code}" do
@@ -288,6 +293,7 @@ end
       code "bash -l -c '#{cmd_code}'"
       ruby_string ruby_version
       returns [0]
+      action :nothing  # Run only if notified
     end
   end
 
