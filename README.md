@@ -90,6 +90,26 @@ Runit (process control and restart)
 MySQL (or optional PostgreSQL)
 Optional-but-tested Redis, MemCacheD and other support
 
+## Which Tools Aren't Happening?
+
+To pick some popular ones:
+
+* Ansible, SaltStack
+* rbenv, chruby (on the guest VM)
+* 
+
+These are all tools that require extensive changes to the guest VM.  Since
+it's very difficult to keep a big constellation of tools tested, that messes
+up a lot of the point of this code. "Opinionated" is important.
+
+With that said, we do allow a few specific variations:
+
+* Postgres rather than MySQL
+* Adding simple cookbooks, including MemCacheD and Redis
+
+Additions are, in general, much more okay than substitutions. It's
+substitutions where you're most likely to see conflicts.
+
 ## Why Not Docker?
 
 Some day Docker will absolutely be the right tool for this. Right now, it
