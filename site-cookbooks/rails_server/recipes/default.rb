@@ -271,6 +271,12 @@ end
     site_root = site_dir
   end
 
+  server_names = site_data["server_names"] ? [site_data["server_names"]].flatten : []
+  redirect_hostnames = site_data["redirect_hostnames"] ? [site_data["redirect_hostnames"]].flatten : []
+  if redirect_hostnames.length > 0 && server_names[0]["*"]
+    raise "Can't redirect to server name with wildcard! Use a first server name with no wildcard!"
+  end
+
   template "#{node['nginx']['dir']}/sites-available/#{site_name}-static.conf" do
     source "nginx-static-site.conf.erb"
     mode "0644"
@@ -278,8 +284,8 @@ end
       :site_dir => site_dir,
       :site_name => site_name,
       :site_root => site_data["root"] || site_dir,
-      :server_names => site_data["server_names"] ? [site_data["server_names"]].flatten : [],
-      :redirect_hostnames => site_data["redirect_hostnames"] ? [site_data["redirect_hostnames"]].flatten : []
+      :server_names => server_names,
+      :redirect_hostnames => redirect_hostnames,
     })
   end
 
@@ -332,14 +338,20 @@ port = 8800 # Assign consecutive Unicorn port ranges starting at 8800
     options vars
   end
 
+  server_names = app_data["server_names"] ? [app_data["server_names"]].flatten : []
+  redirect_hostnames = app_data["redirect_hostnames"] ? [app_data["redirect_hostnames"]].flatten : []
+  if redirect_hostnames.length > 0 && server_names[0]["*"]
+    raise "Can't redirect to server name with wildcard! Use a first server name with no wildcard!"
+  end
+
   template "#{node['nginx']['dir']}/sites-available/#{app_name}-app.conf" do
     source "nginx-site.conf.erb"
     mode "0644"
     variables({:app_dir => vars[:app_dir],
       :app_name => app_name,
       :unicorn_port => port,
-      :server_names => app_data["server_names"] ? [app_data["server_names"]].flatten : [],
-      :redirect_hostnames => app_data["redirect_hostnames"] ? [app_data["redirect_hostnames"]].flatten : []
+      :server_names => server_names,
+      :redirect_hostnames => redirect_hostnames,
     })
   end
 
