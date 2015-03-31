@@ -112,9 +112,10 @@ users.each do |app_user|
 
   # This should be installed automatically,
   # but sometimes isn't for unclear reasons.
-  rvm_gem "bundler" do
-    user app_user
-  end
+  #rvm_gem "bundler" do
+  #  ruby_string ruby_version
+  #  user app_user
+  #end
 
   # Test RVM install
   rvm_shell 'echo ruby' do
