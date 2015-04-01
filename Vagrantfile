@@ -133,7 +133,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     raise "Can't find linode.json in #{creds_dir}! Set one up first!" unless File.exist? File.join(creds_dir, "linode.json")
     ln_options = JSON.parse File.read File.join(creds_dir, "linode.json")
 
-    linode_options.each do |key, value|
+    ln_options.each do |key, value|
       next if key[0] == "#"  # Skip JSON 'comments'
 
       # Getting an error on this send? You may have set a property in the JSON
