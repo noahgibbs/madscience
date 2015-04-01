@@ -41,10 +41,16 @@ end
 # and must be executed before it.  See COOK-1406, which Chef thinks is fixed.
 # I agree with other commenters that this bug still clearly affects Chef
 # 12.0.3 and up, alas.
-
-fix = Chef::Util::FileEdit.new("/opt/chef/embedded/lib/ruby/2.1.0/x86_64-linux/rbconfig.rb")
-fix.search_file_delete_line("^.*LIBPATHENV.*$")
-fix.write_file
+begin
+  fix = Chef::Util::FileEdit.new("/opt/chef/embedded/lib/ruby/2.1.0/x86_64-linux/rbconfig.rb")
+  fix.search_file_delete_line("^.*LIBPATHENV.*$")
+  fix.write_file
+rescue ArgumentError #Exception #IOError
+  # This file exists in Chef 12.0.3, but not in Chef 11. So we're letting this
+  # fix fail in Chef 11, with the understanding that we may have Postgres
+  # problems... But right now, the RVM cookbook fails in Chef 12. Going to
+  # be interesting.
+end
 
 # And here's a workaround because Postgres needs this repo installed and
 # "apt-get update" executed before it runs, but it doesn't call apt-get

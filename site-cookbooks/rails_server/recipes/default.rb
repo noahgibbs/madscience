@@ -110,6 +110,12 @@ users.each do |app_user|
     user app_user
   end
 
+  rvm_gem "bundler-for-madscience" do
+    package_name "bundler"
+    user app_user
+    ruby_string "ruby-#{ruby_version}"
+  end
+
   # This should be installed automatically,
   # but sometimes isn't for unclear reasons.
   #rvm_gem "bundler" do
