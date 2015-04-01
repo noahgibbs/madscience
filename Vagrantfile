@@ -66,7 +66,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   # Use this specific, not-default-for-Vagrant Chef version
   # via the vagrant-omnibus plugin
-  config.omnibus.chef_version = "12.0.3"
+  config.omnibus.chef_version = "11.18.6"
 
   # Files under nodes/*.json.erb are nodes (VMs). For a multi-machine
   # setup, using more than one such file.

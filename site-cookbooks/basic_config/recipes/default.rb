@@ -40,7 +40,7 @@ end
 # This is a workaround for a nasty Chef bug that breaks the Postgres cookbook
 # and must be executed before it.  See COOK-1406, which Chef thinks is fixed.
 # I agree with other commenters that this bug still clearly affects Chef
-# 12.0.3, alas.
+# 12.0.3 and up, alas.
 
 fix = Chef::Util::FileEdit.new("/opt/chef/embedded/lib/ruby/2.1.0/x86_64-linux/rbconfig.rb")
 fix.search_file_delete_line("^.*LIBPATHENV.*$")
