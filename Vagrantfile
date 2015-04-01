@@ -3,6 +3,7 @@
 
 # Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
 VAGRANTFILE_API_VERSION = "2"
+MADSCIENCE_MINIMUM_GEM_VERSION = "0.0.25"
 
 require_relative "config/madscience_config.rb"
 
@@ -11,6 +12,16 @@ require_relative "config/madscience_config.rb"
 UNSET_VARS = %w(_ORIGINAL_GEM_PATH GEM_PATH GEM_HOME GEM_ROOT
                 BUNDLE_BIN_PATH BUNDLE_GEMFILE RUBYLIB RUBYOPT
                 RUBY_ENGINE RUBY_ROOT RUBY_VERSION)
+
+cloned_by = File.join(File.dirname(__FILE__), ".cloned_by")
+if File.exist?(cloned_by)
+  ver = File.read(cloned_by).split("\n")[0].scan(/\d+\.\d+\.\d+/)[0]
+  if !ver || ver < MADSCIENCE_MINIMUM_GEM_VERSION
+    puts "Warning: make sure you've set up this machine with at least MadScience #{MADSCIENCE_MINIMUM_GEM_VERSION}!"
+  end
+else
+  puts "Warning: no .cloned_by file, can't determine MadScience gem version!"
+end
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # All Vagrant configuration is done here. The most common configuration
@@ -40,7 +51,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # Workaround: avoids 'stdin: is not a tty' error.
   config.ssh.shell = "bash -c 'BASH_ENV=/etc/profile exec bash'"
 
-  # First, locate this user's SSH key
+  # Locate this user's SSH key
   home_dir = ENV['HOME'] || ENV['userdir'] || "/home/#{ENV['USER']}"
   ssh_dir = File.join(home_dir, ".ssh")
 
