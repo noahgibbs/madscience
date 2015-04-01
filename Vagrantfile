@@ -125,6 +125,25 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     end
   end if File.exist?(File.join(creds_dir, 'digital_ocean.json'))
 
+  config.vm.provider :linode do |provider, override|
+    override.ssh.private_key_path = private_prov_key_path
+    override.vm.box = 'linode'
+    override.vm.box_url = "https://github.com/displague/vagrant-linode/raw/master/box/linode.box"
+
+    raise "Can't find linode.json in #{creds_dir}! Set one up first!" unless File.exist? File.join(creds_dir, "linode.json")
+    ln_options = JSON.parse File.read File.join(creds_dir, "linode.json")
+
+    linode_options.each do |key, value|
+      next if key[0] == "#"  # Skip JSON 'comments'
+
+      # Getting an error on this send? You may have set a property in the JSON
+      # that doesn't exist.  See
+      # https://github.com/displague/vagrant-linode, section "Supported
+      # Configuration Attributes", for a list of current valid properties.
+      provider.send("#{key}=", value)
+    end
+  end if File.exist?(File.join(creds_dir, 'linode.json'))
+
   chef_json_by_vm.keys.each do |vagrant_hostname|
     chef_json = chef_json_by_vm[vagrant_hostname]
 
