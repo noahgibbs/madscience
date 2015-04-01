@@ -189,13 +189,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     unset -v #{UNSET_VARS.join " "}
         SCRIPT_START
       end
-
-      # This is used primarily by the madscience gem to make sure
-      # the previous deploy step completed successfully.
-      # Sometimes error codes don't propagate correctly.
-      config.vm.provision :host_shell do |shell|
-        shell.inline = "touch .deployed-#{vagrant_hostname}"
-      end
     end
   end
 
