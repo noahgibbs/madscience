@@ -44,7 +44,7 @@ cookbook 'apt', '2.4.0'
 cookbook 'runit', '1.5.10'
 cookbook 'nginx', '2.7.4'
 cookbook 'mysql', '5.3.6'
-cookbook 'database', '2.3.0'
+cookbook 'database', '2.3.1'
 #cookbook 'postgresql', '3.4.2'
 cookbook 'rvm', '0.9.2'
 
