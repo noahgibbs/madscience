@@ -52,10 +52,11 @@ After testing that, do it for real:
     # ONLY when ready to destroy your (real, on Digital Ocean) VM
     vagrant destroy --force
 
-AWS already works, and a provider for Linode is coming soon. They work exactly
-the same way. You'll just replace "digital_ocean" with "aws" or "linode"
-above. You'll also need to edit their JSON files to add credentials, choose
-instance types and otherwise do provider-specific configuration.
+AWS and Linode work exactly the same way. You'll just replace
+"digital_ocean" with "aws" or "linode" above. You'll also need to edit
+their JSON files to add credentials, choose instance types and
+otherwise do provider-specific configuration. See the JSON files
+for documentation links for each provider.
 
 ## Why Is This Different?
 
