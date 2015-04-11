@@ -15,7 +15,8 @@ UNSET_VARS = %w(_ORIGINAL_GEM_PATH GEM_PATH GEM_HOME GEM_ROOT
 
 cloned_by = File.join(File.dirname(__FILE__), ".cloned_by")
 if File.exist?(cloned_by)
-  ver = File.read(cloned_by).split("\n")[0].scan(/\d+\.\d+\.\d+/)[0]
+  first_line = File.read(cloned_by).split("\n")[0] || ""
+  ver = first_line.scan(/\d+\.\d+\.\d+/)[0]
   if !ver || ver < MADSCIENCE_MINIMUM_GEM_VERSION
     puts "Warning: make sure you've set up this machine with at least MadScience #{MADSCIENCE_MINIMUM_GEM_VERSION}!"
   end
