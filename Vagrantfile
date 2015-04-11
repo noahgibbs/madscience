@@ -6,6 +6,7 @@ VAGRANTFILE_API_VERSION = "2"
 MADSCIENCE_MINIMUM_GEM_VERSION = "0.0.25"
 
 require_relative "config/madscience_config.rb"
+require_relative "config/vagrant_deps.rb"
 
 # Here's a list of environment variables to unset when getting a clean
 # environment from inside Vagrant. Based on Vagrant::Util::Env.with_clean_env
@@ -13,16 +14,16 @@ UNSET_VARS = %w(_ORIGINAL_GEM_PATH GEM_PATH GEM_HOME GEM_ROOT
                 BUNDLE_BIN_PATH BUNDLE_GEMFILE RUBYLIB RUBYOPT
                 RUBY_ENGINE RUBY_ROOT RUBY_VERSION)
 
-cloned_by = File.join(File.dirname(__FILE__), ".cloned_by")
-if File.exist?(cloned_by)
-  first_line = File.read(cloned_by).split("\n")[0] || ""
-  ver = first_line.scan(/\d+\.\d+\.\d+/)[0]
-  if !ver || ver < MADSCIENCE_MINIMUM_GEM_VERSION
-    puts "Warning: make sure you've set up this machine with at least MadScience #{MADSCIENCE_MINIMUM_GEM_VERSION}!"
-  end
-else
-  puts "Warning: no .cloned_by file, can't determine MadScience gem version!"
-end
+VagrantDeps.check_cloned_by
+# Plugin list from madscience_gem. All versions exact.
+VagrantDeps.check_plugins([
+  { 'name' => 'vagrant-omnibus', 'version' => '1.4.1' },
+  { 'name' => 'vagrant-librarian-chef', 'version' => '0.2.1' },
+  { 'name' => 'vagrant-aws', 'version' => '0.6.0' },
+  { 'name' => 'vagrant-digitalocean', 'version' => '0.7.3' },
+  { 'name' => 'vagrant-linode', 'version' => '0.1.1' },
+  { 'name' => 'vagrant-host-shell', 'version' => '0.0.4' },
+])
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # All Vagrant configuration is done here. The most common configuration
