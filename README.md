@@ -104,25 +104,46 @@ Runit (process control and restart)
 MySQL (or optional PostgreSQL)
 Optional-but-tested Redis, MemCacheD and other support
 
+This isn't everything, of course.
+
 ## Which Tools Aren't Happening?
 
 To pick some popular ones:
 
 * Ansible, SaltStack
 * rbenv, chruby (on the guest VM)
-* 
 
-These are all tools that require extensive changes to the guest VM.  Since
+These are tools that require extensive changes to the guest VM.  Since
 it's very difficult to keep a big constellation of tools tested, that messes
 up a lot of the point of this code. "Opinionated" is important.
 
-With that said, we do allow a few specific variations:
+We do allow a few specific variations and a lot of additions:
 
 * Postgres rather than MySQL
 * Adding simple cookbooks, including MemCacheD and Redis
+* Storage like MongoDB that is added to MySQL/Postgres rather than replacing
 
 Additions are, in general, much more okay than substitutions. It's
 substitutions where you're most likely to see conflicts.
+
+You can also use services that are handled externally and/or by the
+app, such as:
+
+* Metrics and monitoring like PingDom or Dead Man's Snitch
+* Email via MailGun, SendGrid, Mandrill, etc.
+* External logging via Loglly, AppSumo, etc.
+
+You can also configure *more* nodes. Nothing stops you from
+configuring, say, a multi-node Cassandra cluster via Chef because it
+doesn't interact much with the Rails application server. Instead,
+you'll configure Cassandra as normal via Chef on different hosts than
+the Rails server. You can configure those nodes via the top-level JSON
+files or completely separately.
+
+One strength of MadScience is that it doesn't get in your way when you
+migrate off it. You can start with Chef simply until you need more
+power. Then you just use Chef like the big companies do by "scraping
+off" the top layer of JSON.
 
 ## Why Not Docker?
 
