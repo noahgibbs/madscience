@@ -188,6 +188,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         app_lines = rails_apps.map { |app| "echo Deploying #{app} on #{vagrant_hostname}...\nbash -l -c \"INSTALL_APP=#{app} INSTALL_HOST=#{vagrant_hostname} bundle exec cap production deploy\"" }.join("\n")
         shell.inline = <<-SCRIPT_START + app_lines
     set -e
+    bundle
     unset -v #{UNSET_VARS.join " "}
         SCRIPT_START
       end
@@ -206,6 +207,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     # Plus use a login subshell to make sure rvm is all set up.
     script_start = <<-SCRIPT_START
       set -e
+      bundle
       unset -v #{UNSET_VARS.join " "}
     SCRIPT_START
 
